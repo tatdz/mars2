@@ -12,7 +12,9 @@ import {
   Shield, 
   Eye, 
   Bot,
-  Loader2
+  Loader2,
+  X,
+  MessageCircle
 } from "lucide-react";
 
 interface Delegation {
@@ -22,6 +24,11 @@ interface Delegation {
   mars_score: number;
   recommendation: string;
   risk_level: 'green' | 'yellow' | 'red';
+  callbacks?: {
+    unstake: string;
+    redelegate: string;
+    incidents: string;
+  };
 }
 
 interface ElizaRecommendation {
@@ -35,6 +42,8 @@ export function StakingRecommendations() {
   const [recommendations, setRecommendations] = useState<ElizaRecommendation | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [aiResponse, setAiResponse] = useState<{ message: string; type: string } | null>(null);
+  const [showAiChat, setShowAiChat] = useState(false);
 
   const fetchRecommendations = async () => {
     if (!address) return;
@@ -73,7 +82,12 @@ export function StakingRecommendations() {
             staked_amount: "1000 SEI",
             mars_score: 45,
             recommendation: "🔴 High risk! Unstake immediately and review incidents.",
-            risk_level: 'red'
+            risk_level: 'red',
+            callbacks: {
+              unstake: 'unstake_rhino',
+              redelegate: 'redelegate_rhino',
+              incidents: 'incidents_rhino'
+            }
           },
           {
             validator_address: "seivaloper1example2", 
@@ -81,7 +95,12 @@ export function StakingRecommendations() {
             staked_amount: "500 SEI",
             mars_score: 75,
             recommendation: "🟡 Moderate risk. Monitor or consider reducing stake.",
-            risk_level: 'yellow'
+            risk_level: 'yellow',
+            callbacks: {
+              unstake: 'unstake_blockscope',
+              redelegate: 'redelegate_blockscope',
+              incidents: 'incidents_blockscope'
+            }
           },
           {
             validator_address: "seivaloper1example3",
@@ -89,7 +108,12 @@ export function StakingRecommendations() {
             staked_amount: "2000 SEI",
             mars_score: 85,
             recommendation: "🟢 Healthy — no action needed.",
-            risk_level: 'green'
+            risk_level: 'green',
+            callbacks: {
+              unstake: 'unstake_polkachu_com',
+              redelegate: 'redelegate_polkachu_com',
+              incidents: 'incidents_polkachu_com'
+            }
           }
         ],
         summary: "You have 1 high-risk delegation requiring immediate action. Consider unstaking 1000 SEI from RHINO validator.",
@@ -106,16 +130,40 @@ export function StakingRecommendations() {
     }
   }, [isConnected, address]);
 
-  const handleUnstake = (validatorAddress: string, validatorName: string) => {
-    alert(`Demo: Unstaking from ${validatorName} (${validatorAddress}). This would redirect to Sei staking interface.`);
+  const handleCallback = async (callbackId: string, action: string, validatorName: string) => {
+    if (!address) return;
+    
+    try {
+      setLoading(true);
+      const response = await fetch('/api/eliza/callback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          callback: callbackId,
+          userAddress: address
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get AI response: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setAiResponse(data);
+      setShowAiChat(true);
+    } catch (err) {
+      console.error('Error getting AI response:', err);
+      setError(`Failed to get AI advice for ${action} on ${validatorName}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRedelegate = (validatorAddress: string, validatorName: string) => {
-    alert(`Demo: Redelegating from ${validatorName} to a safer validator. This would open a delegation modal.`);
-  };
-
-  const handleSeeIncidents = (validatorAddress: string, validatorName: string) => {
-    alert(`Demo: Viewing incident reports for ${validatorName}. This would show detailed Mars² incident history.`);
+  const closeAiChat = () => {
+    setShowAiChat(false);
+    setAiResponse(null);
   };
 
   if (!isConnected) {
@@ -226,8 +274,9 @@ export function StakingRecommendations() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleUnstake(delegation.validator_address, delegation.validator_name)}
+                          onClick={() => delegation.callbacks && handleCallback(delegation.callbacks.unstake, 'unstake', delegation.validator_name)}
                           className="flex-1 text-validator-red border-validator-red hover:bg-validator-red hover:text-white"
+                          disabled={loading}
                         >
                           <TrendingDown className="w-3 h-3 mr-1" />
                           Unstake
@@ -235,8 +284,9 @@ export function StakingRecommendations() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleRedelegate(delegation.validator_address, delegation.validator_name)}
+                          onClick={() => delegation.callbacks && handleCallback(delegation.callbacks.redelegate, 'redelegate', delegation.validator_name)}
                           className="flex-1 text-validator-yellow border-validator-yellow hover:bg-validator-yellow hover:text-white"
+                          disabled={loading}
                         >
                           <RefreshCw className="w-3 h-3 mr-1" />
                           Redelegate
@@ -244,8 +294,9 @@ export function StakingRecommendations() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleSeeIncidents(delegation.validator_address, delegation.validator_name)}
+                          onClick={() => delegation.callbacks && handleCallback(delegation.callbacks.incidents, 'incidents', delegation.validator_name)}
                           className="flex-1 text-white border-gray-600 hover:bg-gray-600"
+                          disabled={loading}
                         >
                           <Eye className="w-3 h-3 mr-1" />
                           See Incidents
@@ -259,6 +310,46 @@ export function StakingRecommendations() {
           ) : null}
         </CardContent>
       </Card>
+
+      {/* AI Chat Modal */}
+      {showAiChat && aiResponse && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-dark-card border border-gray-700 rounded-lg max-w-2xl w-full mx-4 max-h-96 overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-gray-700">
+              <div className="flex items-center space-x-2">
+                <MessageCircle className="w-5 h-5 text-purple-accent" />
+                <span className="text-white font-medium">Mars² AI Assistant</span>
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={closeAiChat}
+                className="text-gray-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="p-4 max-h-80 overflow-y-auto">
+              <div className="bg-dark-bg rounded-lg p-4 border border-gray-600">
+                <div className="whitespace-pre-line text-white text-sm leading-relaxed">
+                  {aiResponse.message}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-gray-700 text-right">
+              <Button
+                size="sm"
+                onClick={closeAiChat}
+                className="bg-purple-accent hover:bg-purple-accent/90"
+              >
+                Got it
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

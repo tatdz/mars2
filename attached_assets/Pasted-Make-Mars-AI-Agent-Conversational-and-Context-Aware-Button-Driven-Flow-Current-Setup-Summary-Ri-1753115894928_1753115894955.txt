@@ -1,0 +1,118 @@
+Make Mars² AI Agent Conversational and Context-Aware (Button-Driven Flow)
+✅ Current Setup Summary
+Right now, the Mars² AI agent — powered by @elizaos/plugin-sei — outputs non-interactive text suggestions for the user's validator positions:
+
+The suggestions appear (e.g. “RHINO is red. Unstake recommended.”)
+
+Below each suggestion:
+[Unstake] [Redelegate] [View Incidents]
+
+But: Clicking the buttons does nothing
+
+📈 Goal
+Upgrade the Mars² AI agent + frontend to be a conversational assistant, where:
+
+Eliza agent remembers validator context per wallet
+
+Clicking on [Unstake], [Redelegate], or [View Incidents] sends a follow-up payload to the agent
+
+The agent responds in plain English with:
+
+What unstaking means + how to do it
+
+Where they could redelegate
+
+A readable report of validator incident history (onchain score events)
+
+💬 Step-by-Step Instructions (for Replit)
+✅ Step 1: Use Eliza’s Stateful Memory or Follow-Up Interface
+Instead of having the agent just return recommendations[] as static text…
+
+Store per-user context in the agent (Eliza supports conversation state out-of-the-box via sessions or plugin memory)
+
+Sample recommendation PER validator:
+
+json
+{
+  "validator": "RHINO",
+  "score": 40,
+  "action": "Unstake recommended",
+  "buttons": [
+    { "label": "Unstake", "callback": "unstake_rhino" },
+    { "label": "Redelegate", "callback": "redelegate_rhino" },
+    { "label": "View Incidents", "callback": "incidents_rhino" }
+  ]
+}
+Now when a frontend button is clicked (ex: "unstake_rhino"), send that keyword (callback ID) back to the agent for a contextual response.
+
+✅ Step 2: Handle Button Callbacks in the Agent
+Create functions in the Eliza agent to handle each callback:
+
+js
+// Handle callback actions from buttons
+async function handleCallback(choice) {
+  if (choice === "unstake_rhino") {
+    return "To unstake from RHINO, open your wallet, navigate to staking, and undelegate from: 0xValidatorHere \n\n Estimated cooldown: 14 days.";
+  }
+  if (choice === "redelegate_rhino") {
+    return "You can choose from these top performing validators:\n\n1. Imperator – 99.9% uptime\n2. FTL Labs – voted in all proposals\n\nUse the wallet 'Redelegate' function to move your stake.";
+  }
+  if (choice === "incidents_rhino") {
+    const events = await getValidatorEvents("0xValidatorHere");
+    return `📍 RHINO Incident History:\n\n- Missed 12 blocks on July 17\n- Score dropped -10 (Community Report)\n- Jailed briefly on July 4\n\nCurrent Status: Score 40 🔴`;
+  }
+  return "I didn't understand your request. Please try again.";
+}
+✅ Step 3: Make the Frontend Buttons Interactive
+Each validator card has buttons:
+
+jsx
+<button onClick={() => sendCallback("unstake_rhino")}>Unstake</button>
+<button onClick={() => sendCallback("redelegate_rhino")}>Redelegate</button>
+<button onClick={() => sendCallback("incidents_rhino")}>View Incidents</button>
+Define the callback handler:
+
+js
+const sendCallback = async (choiceId) => {
+  const res = await fetch("/eliza/callback", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ callback: choiceId })
+  });
+  const data = await res.json();
+  setAgentResponse(data.message);  // display this in chatbot / modal
+};
+Show agentResponse inside a chatbot UI or info modal.
+
+🎤 Bonus Step: Make It Fully Conversational (Chat Sidebar)
+Add an Eliza-powered chat to the app (simple sidebar window)
+
+User can type:
+"Should I unstake from RHINO?"
+
+Agent could respond:
+
+“The validator RHINO is underperforming (score 40, 🔴 Red). Based on staking risk rules, I recommend unstaking to avoid downtime risk.”
+
+Enable multi-turn:
+Store connected wallet address → fetch staking state on load
+
+Let user type “what’s the safest validator today?”
+→ Agent cross-checks Mars² scores and validator stats
+
+Let user ask “what happened to validator RHINO?”
+→ Agent calls Mars² getEvents and returns a summary.
+
+🤖 Prompt Examples (for UX prompt or testing)
+Send these to the agent for testing:
+
+“Give me staking advice for my validators.”
+
+“What’s going on with RHINO?”
+
+“Should I move funds from FTL?”
+
+Callback: unstake_rhino
+
+Callback: incidents_rhino
+

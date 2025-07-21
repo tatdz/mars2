@@ -130,6 +130,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Eliza AI callback handler for interactive conversations
+  app.post('/api/eliza/callback', async (req, res) => {
+    try {
+      const { callback, userAddress } = req.body;
+      
+      if (!callback || !userAddress) {
+        return res.status(400).json({
+          error: 'Invalid request',
+          message: 'callback and userAddress are required'
+        });
+      }
+
+      console.log(`Processing callback: ${callback} for ${userAddress}`);
+      const response = await elizaAgent.handleCallback(callback, userAddress);
+      
+      res.json(response);
+    } catch (error: any) {
+      console.error('Error processing callback:', error);
+      res.status(500).json({
+        error: 'Failed to process callback',
+        message: error.message
+      });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

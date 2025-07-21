@@ -105,6 +105,121 @@ export class ElizaStakingAgent {
     }
   }
 
+  // Handle interactive button callbacks for conversational responses
+  async handleCallback(callbackId: string, userAddress: string) {
+    try {
+      console.log(`Eliza AI: Handling callback ${callbackId} for ${userAddress}`);
+      
+      if (callbackId.startsWith('unstake_')) {
+        const validatorName = callbackId.replace('unstake_', '').toUpperCase();
+        return {
+          message: `To unstake from ${validatorName}, follow these steps:\n\n1. Open your MetaMask wallet\n2. Navigate to the Sei staking interface\n3. Find your delegation to ${validatorName}\n4. Click "Undelegate" and confirm the transaction\n\n⚠️ Important: Unstaking has a 21-day unbonding period. Your SEI will be locked during this time.\n\nEstimated gas cost: ~0.01 SEI\nUnbonding period: 21 days`,
+          type: 'unstake_guide'
+        };
+      }
+      
+      if (callbackId.startsWith('redelegate_')) {
+        const validatorName = callbackId.replace('redelegate_', '').toUpperCase();
+        // Fetch top validators for redelegation suggestions
+        const topValidators = await this.getTopValidators();
+        const suggestions = topValidators.slice(0, 3).map((v, i) => 
+          `${i + 1}. ${v.name} - Mars² Score: ${v.score} (${v.uptime}% uptime)`
+        ).join('\n');
+        
+        return {
+          message: `Moving your stake from ${validatorName} to a safer validator:\n\n🏆 Top Recommended Validators:\n${suggestions}\n\n📝 How to redelegate:\n1. Open your wallet's staking section\n2. Find your ${validatorName} delegation\n3. Click "Redelegate" (no unbonding period!)\n4. Choose one of the recommended validators above\n5. Confirm the transaction\n\n✨ Pro tip: Redelegation is instant - no waiting period required!`,
+          type: 'redelegate_guide'
+        };
+      }
+      
+      if (callbackId.startsWith('incidents_')) {
+        const validatorName = callbackId.replace('incidents_', '').toUpperCase();
+        const incidents = await this.getValidatorIncidents(validatorName);
+        
+        return {
+          message: `📊 ${validatorName} Incident Report:\n\n${incidents.summary}\n\n📈 Recent Events:\n${incidents.events.join('\n')}\n\n🔍 Mars² Analysis:\n${incidents.analysis}\n\n💡 Recommendation: ${incidents.recommendation}`,
+          type: 'incident_report'
+        };
+      }
+      
+      // General conversational responses
+      if (callbackId === 'general_advice') {
+        const delegations = await this.getUserDelegations(userAddress);
+        const riskCount = delegations.filter(d => d.risk === 'high').length;
+        
+        if (riskCount === 0) {
+          return {
+            message: "Your staking portfolio looks healthy! All validators have acceptable Mars² scores. Keep monitoring for any changes in validator performance.",
+            type: 'general_advice'
+          };
+        } else {
+          return {
+            message: `I found ${riskCount} high-risk delegation(s) in your portfolio. Consider unstaking or redelegating to safer validators to protect your assets. Would you like specific recommendations?`,
+            type: 'general_advice'
+          };
+        }
+      }
+      
+      return {
+        message: "I didn't understand that request. Try asking about unstaking, redelegating, or viewing incidents for a specific validator.",
+        type: 'error'
+      };
+      
+    } catch (error) {
+      console.error('Eliza callback error:', error);
+      return {
+        message: "I encountered an error processing your request. Please try again or contact support.",
+        type: 'error'
+      };
+    }
+  }
+
+  // Get top performing validators for redelegation recommendations  
+  async getTopValidators() {
+    // In production, this would query the real Mars² scoring contract
+    return [
+      { name: 'Imperator.co', score: 98, uptime: 99.9 },
+      { name: 'StingRay', score: 95, uptime: 99.7 },
+      { name: 'polkachu.com', score: 92, uptime: 99.5 },
+      { name: 'Nodes.Guru', score: 90, uptime: 99.2 }
+    ];
+  }
+
+  // Get incident history for a specific validator
+  async getValidatorIncidents(validatorName: string) {
+    // In production, this would query Mars² contracts and incident reports
+    const incidents: { [key: string]: any } = {
+      'RHINO': {
+        summary: "RHINO has experienced multiple performance issues recently, leading to a low Mars² score.",
+        events: [
+          "• July 17: Missed 12 consecutive blocks (downtime event)",
+          "• July 15: Community reported governance voting absence", 
+          "• July 4: Temporarily jailed due to double-signing incident",
+          "• June 28: Score penalty applied (-15 points)"
+        ],
+        analysis: "Pattern of reliability issues with governance participation concerns. Score dropped from 75 to 40 over the past month.",
+        recommendation: "High risk - consider unstaking immediately. Multiple incidents indicate ongoing validator management issues."
+      },
+      'BLOCKSCOPE': {
+        summary: "Blockscope shows moderate risk with recent performance fluctuations.",
+        events: [
+          "• July 10: Minor uptime dip to 98.5%",
+          "• June 25: Missed 2 governance proposals",
+          "• June 15: Brief network connectivity issues"
+        ],
+        analysis: "Generally reliable but showing some inconsistency. Mars² score steady at 75.",
+        recommendation: "Moderate risk - monitor closely or consider partial redelegation to diversify risk."
+      }
+    };
+    
+    return incidents[validatorName] || {
+      summary: `${validatorName} incident data is being analyzed.`,
+      events: ["• No major incidents recorded in the past 30 days"],
+      analysis: "Validator appears to be performing within acceptable parameters.",
+      recommendation: "Continue monitoring through Mars² dashboard for any changes."
+    };
+  }
+
   // Main function to get personalized staking recommendations
   async getStakingRecommendations(userAddress: string) {
     try {
@@ -126,7 +241,12 @@ export class ElizaStakingAgent {
             staked_amount: this.formatSeiAmount(delegation.shares),
             mars_score: score,
             recommendation: aiRecommendation.recommendation,
-            risk_level: aiRecommendation.riskLevel
+            risk_level: aiRecommendation.riskLevel,
+            callbacks: {
+              unstake: `unstake_${delegation.validator?.description?.moniker?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'validator'}`,
+              redelegate: `redelegate_${delegation.validator?.description?.moniker?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'validator'}`,
+              incidents: `incidents_${delegation.validator?.description?.moniker?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'validator'}`
+            }
           };
         })
       );
