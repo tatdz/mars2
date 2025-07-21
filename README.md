@@ -5,10 +5,9 @@ A comprehensive real-time staking security explorer for the Sei EVM testnet that
 ## Features
 
 - **Real-time Validator Monitoring**: Live scoring system with color-coded risk assessments
-- **Anonymous Incident Reporting**: Zero-knowledge proof-based reporting system
+- **Anonymous Incident Reporting**: Zero-knowledge proof-based and Sibyl resistant reporting system
 - **Encrypted Group Messaging**: Secure validator communication with key management
-- **MetaMask Integration**: Seamless wallet connectivity for Sei EVM testnet
-- **Futuristic UI**: Mars-themed interface with animated logo and modern design
+- **MetaMask Integration**: Wallet connectivity for Sei EVM testnet
 
 ## Smart Contracts
 
@@ -37,17 +36,22 @@ Mars² uses three main contracts deployed on Sei EVM Testnet (Atlantic-2):
 
 ## Getting Started
 
-1. **Install Dependencies**
+1.**Clone the repository**
+```bash
+git clone https://github.com/tatdz/mars2.git
+cd mars2
+```
+2. **Install Dependencies**
    ```bash
    npm install
    ```
 
-2. **Start Development Server**
+3. **Start Development Server**
    ```bash
    npm run dev
    ```
 
-3. **Connect MetaMask**
+4. **Connect MetaMask**
    - The app will automatically configure Sei testnet in MetaMask
    - Ensure you have testnet SEI tokens for transactions
 
