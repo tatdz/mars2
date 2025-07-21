@@ -251,8 +251,8 @@ export function DocsPage() {
                           <Eye className="w-5 h-5 text-purple-accent" />
                           <span className="font-semibold text-white">Reports Filed</span>
                         </div>
-                        <p className="text-2xl font-bold text-purple-accent">156</p>
-                        <p className="text-xs text-gray-400">Anonymous & verified</p>
+                        <p className="text-2xl font-bold text-white">156</p>
+                        <p className="text-xs text-white">Anonymous & verified</p>
                       </CardContent>
                     </Card>
                   </div>

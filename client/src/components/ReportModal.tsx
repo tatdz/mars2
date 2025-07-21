@@ -222,7 +222,7 @@ export function ReportModal({ isOpen, onClose, validatorAddress, validators }: R
                 type="button"
                 variant="outline"
                 onClick={onClose}
-                className="flex-1 border-gray-600 hover:bg-gray-500"
+                className="flex-1 border-gray-600 hover:bg-gray-500 text-black"
               >
                 Cancel
               </Button>

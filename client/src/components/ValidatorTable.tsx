@@ -206,21 +206,21 @@ export function ValidatorTable() {
                         <div className="flex space-x-2">
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="default"
                             onClick={() => handleReportClick(validator.operator_address)}
-                            className="text-validator-yellow hover:text-yellow-300 hover:bg-validator-yellow/10"
+                            className="text-validator-yellow hover:text-yellow-300 hover:bg-validator-yellow/10 h-10 px-4"
                             title="Report an incident for this validator"
                           >
-                            <AlertTriangle className="w-4 h-4" />
+                            <AlertTriangle className="w-5 h-5" />
                           </Button>
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="default"
                             onClick={() => setSelectedValidatorDetails(validator)}
-                            className="text-sei-blue hover:text-blue-300 hover:bg-sei-blue/10"
+                            className="text-sei-blue hover:text-blue-300 hover:bg-sei-blue/10 h-10 px-4"
                             title="View detailed score explanation"
                           >
-                            <Info className="w-4 h-4" />
+                            <Info className="w-5 h-5" />
                           </Button>
                         </div>
                       </TableCell>
