@@ -298,10 +298,12 @@ Guidelines:
       let aiResponse = '';
       
       // Use enhanced AI responses as primary system (Ollama as optional enhancement)
-      console.log('Generating AI response using Mars² knowledge base...');
+      console.log(`Generating AI response for: "${userQuestion}"`);
       const lowerQuestion = userQuestion.toLowerCase();
       
-      if (lowerQuestion.includes('best validator') || lowerQuestion.includes('choose validator') || (lowerQuestion.includes('validator') && lowerQuestion.includes('recommend'))) {
+      // More specific question detection with priority order
+      if (lowerQuestion.includes('best validator') || lowerQuestion.includes('choose validator') || 
+          (lowerQuestion.includes('validator') && (lowerQuestion.includes('recommend') || lowerQuestion.includes('select')))) {
         aiResponse = `**Choosing the Best Sei Validators with Mars²**
 
 Based on current Sei testnet data and Mars² analysis:
@@ -331,7 +333,8 @@ ${validatorContext}
 • Score Contract: 0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294
 • Incident Reports: Anonymous ZK attestations available
 • Real-time monitoring via Sei EVM integration`;
-      } else if (lowerQuestion.includes('stake') || lowerQuestion.includes('staking') || lowerQuestion.includes('delegate')) {
+      } else if ((lowerQuestion.includes('stake') || lowerQuestion.includes('staking') || lowerQuestion.includes('delegate')) && 
+                 !lowerQuestion.includes('risk') && !lowerQuestion.includes('security')) {
         aiResponse = `**Sei Staking Guide with Mars² Security**
 
 **Current Sei Network:**
@@ -370,7 +373,8 @@ ${validatorContext}
 • Real-time incident monitoring via 0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae
 • Anonymous community reporting system
 • Automated risk scoring and alerts`;
-      } else if (lowerQuestion.includes('mars') || lowerQuestion.includes('platform') || lowerQuestion.includes('contract')) {
+      } else if ((lowerQuestion.includes('mars') || lowerQuestion.includes('platform') || lowerQuestion.includes('contract')) && 
+                 !lowerQuestion.includes('risk') && !lowerQuestion.includes('security') && !lowerQuestion.includes('incident')) {
         aiResponse = `**Mars² Platform Overview**
 
 **Smart Contract System:**
@@ -410,7 +414,8 @@ ${validatorContext}
 • MetaMask wallet connectivity
 • Real-time API data feeds
 • Cross-platform compatibility`;
-      } else if (lowerQuestion.includes('risk') || lowerQuestion.includes('security') || lowerQuestion.includes('incident')) {
+      } else if (lowerQuestion.includes('risk') || lowerQuestion.includes('security') || lowerQuestion.includes('incident') || 
+                 lowerQuestion.includes('slash') || lowerQuestion.includes('danger')) {
         aiResponse = `**Mars² Security & Risk Analysis**
 
 **Current Network Status:**
@@ -445,6 +450,68 @@ ${validatorContext}
 • Avoid validators with governance non-participation
 • Watch for double-signing incidents
 • Use Mars² early warning system`;
+      } else if (lowerQuestion.includes('how') || lowerQuestion.includes('what') || lowerQuestion.includes('why') || 
+                 lowerQuestion.includes('when') || lowerQuestion.includes('where')) {
+        // Dynamic response based on specific question content
+        if (lowerQuestion.includes('work') || lowerQuestion.includes('function')) {
+          aiResponse = `**How Mars² Works on Sei**
+
+**System Architecture:**
+Mars² operates as a comprehensive validator security platform on Sei EVM testnet:
+
+**Data Collection Layer:**
+• **Sei API Integration**: Real-time validator performance monitoring
+• **Block Data**: Uptime tracking, missed blocks, governance participation
+• **Network Events**: Slashing events, validator status changes
+• **Community Reports**: Anonymous incident submissions via ZK proofs
+
+**Analysis Engine:**
+• **Risk Scoring Algorithm**: 0-100 scoring based on multiple factors
+• **Performance Metrics**: Uptime, commission changes, self-bond levels
+• **Governance Tracking**: Proposal voting history and participation rates
+• **Incident Correlation**: Community reports impact on validator scores
+
+**Smart Contract Integration:**
+• **Score Contract** (0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294): Stores and updates validator risk scores
+• **Attestation Contract** (0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae): Handles anonymous incident reporting
+• **Messaging Contract** (0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950): Enables secure validator communication
+
+**Current Sei Network:**
+${validatorContext}
+
+**User Interface:**
+• Real-time dashboard showing color-coded validator scores
+• Historical performance charts and trends
+• Anonymous incident reporting interface
+• Secure messaging system for validator coordination`;
+        } else {
+          aiResponse = `**Mars² AI Assistant - Personalized Response**
+
+Based on your question: "${userQuestion}"
+
+**Current Sei Network Status:**
+${validatorContext}
+
+**Relevant Information:**
+Let me provide specific guidance based on what you're asking about:
+
+**If you're asking about validators:** Mars² tracks 100+ Sei validators with real-time scoring. Green (80+) scores indicate safe validators, yellow (60-79) need monitoring, red (<60) should be avoided.
+
+**If you're asking about staking:** Sei offers ~15-20% APR with 21-day unbonding. Use Mars² scores to select safe validators and diversify across 3-5 different validators.
+
+**If you're asking about Mars² features:** Our platform provides anonymous incident reporting, encrypted messaging, and real-time risk assessment through smart contracts on Sei EVM.
+
+**If you're asking about risks:** Main risks include validator slashing (0.01% downtime, 5% double-sign), commission changes, and technical failures. Mars² helps identify these risks early.
+
+**If you're asking about technical details:** Mars² uses three main smart contracts for scoring, attestations, and messaging, all deployed on Sei EVM testnet.
+
+**Smart Contracts:**
+• Score: 0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294
+• Reports: 0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae
+• Messages: 0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950
+
+Could you be more specific about what aspect you'd like to explore further?`;
+        }
       } else {
         aiResponse = `**Mars² AI - Sei Staking Assistant**
 
@@ -488,36 +555,90 @@ ${validatorContext}
 Ask me anything about Sei staking, validator analysis, or Mars² security features!`;
       }
       
-      // Try Ollama enhancement in background (don't wait)
-      setTimeout(async () => {
+      // Try Ollama enhancement with proper timeout (parallel processing)
+      const ollamaPromise = (async () => {
         try {
+          console.log('Attempting Ollama Llama3 enhancement...');
           const controller = new AbortController();
-          setTimeout(() => controller.abort(), 3000); // Very short timeout
+          setTimeout(() => controller.abort(), 5000); // 5 second timeout
+          
+          // Create enhanced prompt with Sei documentation context
+          const enhancedMessages = [
+            {
+              role: 'system',
+              content: `You are Mars² AI, an expert on Sei blockchain staking and validator analysis. Use the following context to provide accurate, detailed responses:
+
+CONTEXT:
+- Sei is the fastest blockchain (600ms block time) with EVM compatibility
+- Mars² platform provides real-time validator risk scoring (0-100 scale)
+- Current network has ~100 active validators on Atlantic-2 testnet
+- Sei staking has 21-day unbonding period with ~15-20% APR
+- Mars² smart contracts: Score (0x2358...), Attestation (0x45d1...), Messaging (0x9FE4...)
+- Green scores (80+) = safe, Yellow (60-79) = monitor, Red (<60) = avoid
+- Key risks: slashing (0.01% downtime, 5% double-sign), validator performance, commission changes
+
+INSTRUCTIONS:
+- Provide specific, actionable advice
+- Reference real Mars² features and contract addresses
+- Include current network context: ${validatorContext}
+- Focus on practical staking guidance
+- Mention Mars² security features when relevant`
+            },
+            ...messages.slice(-2) // Recent conversation context
+          ];
           
           const ollamaResponse = await fetch('http://localhost:11434/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               model: 'llama3:8b',
-              messages: messages.slice(-3), // Only recent context
+              messages: enhancedMessages,
               stream: false,
-              options: { temperature: 0.7, num_predict: 200 }
+              options: { 
+                temperature: 0.7, 
+                top_p: 0.9,
+                num_predict: 400,
+                num_ctx: 3072,
+                repeat_penalty: 1.1
+              }
             }),
             signal: controller.signal
           });
           
           if (ollamaResponse.ok) {
             const data = await ollamaResponse.json();
-            if (data.message?.content?.trim()) {
-              console.log('Ollama enhancement available for future requests');
+            const ollamaContent = data.message?.content?.trim();
+            if (ollamaContent && ollamaContent.length > 100) {
+              console.log('Ollama Llama3 enhanced response generated successfully');
+              return ollamaContent;
             }
           }
-        } catch (error) {
-          // Silent failure - enhanced responses are primary
+        } catch (error: any) {
+          if (error.name === 'AbortError') {
+            console.log('Ollama request timed out, using knowledge base response');
+          } else {
+            console.log('Ollama unavailable, using knowledge base response:', error.message);
+          }
         }
-      }, 0);
-      
-      // Remove the old fallback logic since we're using enhanced responses as primary
+        return null;
+      })();
+
+      // Use Ollama if available within timeout, otherwise use knowledge base
+      try {
+        const ollamaResult = await Promise.race([
+          ollamaPromise,
+          new Promise(resolve => setTimeout(() => resolve(null), 5000))
+        ]);
+        
+        if (ollamaResult && typeof ollamaResult === 'string') {
+          aiResponse = ollamaResult;
+          console.log('Using Ollama Llama3 enhanced response');
+        } else {
+          console.log('Using Mars² knowledge base response');
+        }
+      } catch (error) {
+        console.log('Ollama processing failed, using knowledge base response');
+      }
 
 
       if (!aiResponse) {
