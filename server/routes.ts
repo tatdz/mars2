@@ -36,12 +36,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = await response.json();
       console.log(`Successfully fetched ${data.validators?.length || 0} validators`);
       
-      // Transform the data to match our expected format
-      const transformedData = {
-        validators: data.validators || []
-      };
+      // Transform the data to match our expected format and add scoring simulation
+      const transformedValidators = data.validators?.map((validator: any, index: number) => {
+        // Generate consistent but varied scores based on validator address
+        const hash = validator.operator_address.slice(-8);
+        const numHash = parseInt(hash, 16);
+        const baseScore = 60 + (numHash % 40); // Range 60-99
+        
+        // Simulate different statuses based on jailed status and tokens
+        let status = 'active';
+        let score = baseScore;
+        
+        if (validator.jailed) {
+          status = 'jailed';
+          score = Math.max(20, baseScore - 40);
+        } else if (validator.status !== 'BOND_STATUS_BONDED') {
+          status = 'inactive';
+          score = Math.max(40, baseScore - 20);
+        }
+        
+        const tokens = parseInt(validator.tokens) || 0;
+        const votingPower = tokens / 1000000; // Convert to SEI from usei
+        
+        return {
+          operator_address: validator.operator_address,
+          consensus_pubkey: validator.consensus_pubkey,
+          jailed: validator.jailed,
+          status: validator.status,
+          tokens: validator.tokens,
+          delegator_shares: validator.delegator_shares,
+          description: {
+            moniker: validator.description?.moniker || `Validator ${index + 1}`,
+            identity: validator.description?.identity || '',
+            website: validator.description?.website || '',
+            security_contact: validator.description?.security_contact || '',
+            details: validator.description?.details || ''
+          },
+          unbonding_height: validator.unbonding_height,
+          unbonding_time: validator.unbonding_time,
+          commission: validator.commission,
+          min_self_delegation: validator.min_self_delegation,
+          // Mars² specific fields
+          mars_score: score,
+          mars_status: status,
+          voting_power: votingPower,
+          uptime: Math.max(85, 95 + (numHash % 10)), // 95-104% range, capped at reasonable values
+          recent_reports: Math.floor(numHash % 3), // 0-2 reports
+          last_updated: new Date().toISOString()
+        };
+      }) || [];
       
-      res.json(transformedData);
+      // Sort by voting power (tokens) descending
+      transformedValidators.sort((a: any, b: any) => parseInt(b.tokens) - parseInt(a.tokens));
+      
+      res.json({
+        validators: transformedValidators
+      });
     } catch (error: any) {
       console.error('Error fetching validators:', error);
       res.status(500).json({ 

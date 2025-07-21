@@ -128,11 +128,12 @@ export function ValidatorTable() {
                 </TableRow>
               ) : (
                 displayedValidators.map((validator) => {
-                  const score = scoreValidator(validator);
+                  // Use the Mars² score if available, otherwise calculate
+                  const score = validator.mars_score || scoreValidator(validator);
                   const scoreColor = getScoreColor(score);
                   const scoreColorClass = getScoreColorClass(score);
-                  const statusColor = getStatusColor(validator.status, validator.jailed);
-                  const statusText = getStatusText(validator.status, validator.jailed);
+                  const statusColor = getStatusColor(validator.mars_status || validator.status, validator.jailed);
+                  const statusText = getStatusText(validator.mars_status || validator.status, validator.jailed);
 
                   return (
                     <TableRow 
@@ -188,11 +189,11 @@ export function ValidatorTable() {
                       </TableCell>
                       <TableCell>
                         <span className={`${scoreColorClass} font-medium`}>
-                          {(validator.uptime || 0).toFixed(1)}%
+                          {validator.uptime ? validator.uptime.toFixed(1) : (validator.uptime || 0).toFixed(1)}%
                         </span>
                       </TableCell>
                       <TableCell>
-                        <span className="text-white">{validator.missed_blocks || 0}</span>
+                        <span className="text-white">{validator.missed_blocks || validator.recent_reports || 0}</span>
                       </TableCell>
                       <TableCell>
                         <Badge 
