@@ -140,3 +140,5 @@ Preferred communication style: Simple, everyday language.
 - **Documentation Reorganization**: Split Smart Contracts into separate section and added User Flow guides
 - **UI/UX Improvements**: Fixed text visibility issues and made action buttons more prominent
 - **Button Enhancements**: Increased size of report and info buttons for better user experience
+- **GitHub README Enhancement**: Updated Mars² description with new branding and added comprehensive hosting instructions
+- **User Flow Documentation**: Added detailed step-by-step guides for stakers, validators, and anonymous reporting workflow
