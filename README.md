@@ -183,6 +183,20 @@ The application includes demo functionality that works without requiring MetaMas
 
 ## Development
 
+### Security & Environment Setup
+
+**Environment Variables:**
+- All secrets are managed through environment variables (never commit to repository)
+- Required for AI features: `OPENAI_API_KEY` (OpenAI GPT-4o access)
+- Use Replit Secrets or your platform's environment management system
+- The `.gitignore` file prevents accidental secret exposure
+
+**Security Practices:**
+- No API keys or secrets in source code
+- Environment variables used for all sensitive data
+- Comprehensive `.gitignore` for common secret file patterns
+- Zero-knowledge proof simulation for anonymous reporting
+
 ### Project Structure
 ```
 ├── client/          # React frontend
