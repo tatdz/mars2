@@ -24,37 +24,40 @@
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
 
-  /* Mars² Dark Theme Variables */
-  --sei-blue: hsl(207, 90%, 54%);
-  --sei-dark-blue: hsl(207, 100%, 26%);
-  --validator-green: hsl(122, 39%, 49%);
-  --validator-yellow: hsl(36, 100%, 50%);
-  --validator-red: hsl(4, 90%, 58%);
-  --dark-bg: hsl(0, 0%, 7%);
-  --dark-surface: hsl(0, 0%, 12%);
-  --dark-card: hsl(0, 0%, 18%);
+  /* Mars² Futuristic Theme - Based on screenshot */
+  --sei-blue: hsl(268, 70%, 70%);
+  --sei-dark-blue: hsl(268, 70%, 60%);
+  --validator-green: hsl(142, 71%, 45%);
+  --validator-yellow: hsl(48, 96%, 53%);
+  --validator-red: hsl(0, 84%, 60%);
+  --dark-bg: hsl(229, 32%, 10%);
+  --dark-surface: hsl(229, 35%, 12%);
+  --dark-card: hsl(229, 38%, 8%);
+  --purple-accent: hsl(268, 70%, 70%);
+  --blue-accent: hsl(221, 83%, 53%);
+  --cyan-accent: hsl(185, 84%, 52%);
 }
 
 .dark {
-  --background: hsl(240, 10%, 3.9%);
+  --background: hsl(229, 32%, 10%);
   --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(240, 3.7%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
-  --popover: hsl(240, 10%, 3.9%);
+  --muted: hsl(229, 30%, 15%);
+  --muted-foreground: hsl(229, 20%, 65%);
+  --popover: hsl(229, 38%, 8%);
   --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 10%, 3.9%);
+  --card: hsl(229, 38%, 8%);
   --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(240, 3.7%, 15.9%);
+  --border: hsl(229, 25%, 20%);
+  --input: hsl(229, 25%, 20%);
+  --primary: hsl(268, 70%, 70%);
+  --primary-foreground: hsl(229, 32%, 10%);
+  --secondary: hsl(229, 30%, 15%);
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
+  --accent: hsl(229, 30%, 15%);
   --accent-foreground: hsl(0, 0%, 98%);
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(240, 4.9%, 83.9%);
+  --ring: hsl(268, 70%, 70%);
   --radius: 0.5rem;
 }
 

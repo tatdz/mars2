@@ -6,9 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ReportModal } from "@/components/ReportModal";
-import { AlertTriangle, Info, RefreshCw, CheckCircle, Triangle } from "lucide-react";
+import { AlertTriangle, Info, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function ValidatorTable() {
@@ -30,7 +29,7 @@ export function ValidatorTable() {
         <CardContent className="pt-6">
           <div className="text-center py-8">
             <AlertTriangle className="w-12 h-12 text-validator-red mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Failed to Load Validators</h3>
+            <h3 className="text-lg font-semibold mb-2 text-white">Failed to Load Validators</h3>
             <p className="text-gray-400 mb-4">
               Unable to fetch validator data from the Sei network.
             </p>
@@ -46,42 +45,22 @@ export function ValidatorTable() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">Validator Dashboard</h2>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2 text-sm text-gray-400">
-            <span>Last updated:</span>
-            <span>2 min ago</span>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isLoading}
-            className="bg-dark-card hover:bg-gray-600 border-gray-600"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-          </Button>
-        </div>
-      </div>
-
       {/* Score Legend */}
       <Card className="bg-dark-card border-gray-700">
         <CardContent className="pt-4">
-          <h3 className="font-semibold mb-3">Score Legend</h3>
+          <h3 className="font-semibold mb-3 text-white">Score Legend</h3>
           <div className="flex flex-wrap gap-6">
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-validator-green rounded"></div>
-              <span className="text-sm">80-100: Stake freely</span>
+              <span className="text-sm text-gray-300">80-100: Stake freely</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-validator-yellow rounded"></div>
-              <span className="text-sm">50-79: Monitor closely</span>
+              <span className="text-sm text-gray-300">50-79: Monitor closely</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-validator-red rounded"></div>
-              <span className="text-sm">0-49: Unstake</span>
+              <span className="text-sm text-gray-300">0-49: Unstake</span>
             </div>
           </div>
         </CardContent>
@@ -103,20 +82,22 @@ export function ValidatorTable() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                // Loading skeleton
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i} className="border-gray-700">
+                Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow key={index} className="border-gray-700">
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         <Skeleton className="w-8 h-8 rounded-full" />
-                        <div className="space-y-1">
-                          <Skeleton className="w-32 h-4" />
-                          <Skeleton className="w-24 h-3" />
+                        <div>
+                          <Skeleton className="w-24 h-4 mb-1" />
+                          <Skeleton className="w-16 h-3" />
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="w-16 h-8" />
+                      <div className="flex items-center space-x-2">
+                        <Skeleton className="w-12 h-12 rounded-full" />
+                        <Skeleton className="w-8 h-4" />
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Skeleton className="w-12 h-4" />
@@ -150,20 +131,19 @@ export function ValidatorTable() {
                   const scoreColorClass = getScoreColorClass(score);
                   const statusColor = getStatusColor(validator.status, validator.jailed);
                   const statusText = getStatusText(validator.status, validator.jailed);
-                  const actionMessage = getNextActionMessage(score);
 
                   return (
-                    <React.Fragment key={validator.operator_address}>
-                      <TableRow 
-                        className="border-gray-700 hover:bg-gray-700/50 transition-colors"
-                      >
+                    <TableRow 
+                      key={validator.operator_address}
+                      className="border-gray-700 hover:bg-gray-700/50 transition-colors"
+                    >
                       <TableCell>
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-sei-blue rounded-full flex items-center justify-center text-sm font-bold">
+                          <div className="w-8 h-8 bg-sei-blue rounded-full flex items-center justify-center text-sm font-bold text-white">
                             {validator.description.moniker.slice(0, 2).toUpperCase()}
                           </div>
                           <div>
-                            <div className="font-medium">{validator.description.moniker}</div>
+                            <div className="font-medium text-white">{validator.description.moniker}</div>
                             <div className="text-sm text-gray-400">
                               {formatAddress(validator.operator_address)}
                             </div>
@@ -190,24 +170,28 @@ export function ValidatorTable() {
                                 stroke="currentColor"
                                 strokeWidth="3"
                                 fill="transparent"
-                                strokeDasharray="100.48"
-                                strokeDashoffset={100.48 - (score / 100) * 100.48}
+                                strokeDasharray={100.53}
+                                strokeDashoffset={100.53 - (100.53 * score) / 100}
                                 className={scoreColorClass}
+                                strokeLinecap="round"
                               />
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-xs font-bold">{score}</span>
+                              <span className={`text-sm font-bold ${scoreColorClass}`}>
+                                {score}
+                              </span>
                             </div>
                           </div>
-                          <span className={`${scoreColorClass} font-semibold`}>{score}</span>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className={scoreColorClass}>
+                        <span className={`${scoreColorClass} font-medium`}>
                           {(validator.uptime || 0).toFixed(1)}%
                         </span>
                       </TableCell>
-                      <TableCell>{validator.missed_blocks || 0}</TableCell>
+                      <TableCell>
+                        <span className="text-white">{validator.missed_blocks || 0}</span>
+                      </TableCell>
                       <TableCell>
                         <Badge 
                           variant="outline" 
@@ -236,57 +220,6 @@ export function ValidatorTable() {
                         </div>
                       </TableCell>
                     </TableRow>
-                    
-                    {/* Action Recommendation Row */}
-                    <TableRow 
-                      key={`${validator.operator_address}-action`}
-                      className="border-gray-700 bg-gray-800/30"
-                    >
-                      <TableCell colSpan={6} className="py-3">
-                        <Alert className={`border-l-4 ${
-                          actionMessage.color === 'green' 
-                            ? 'border-validator-green bg-validator-green/5' 
-                            : actionMessage.color === 'yellow' 
-                            ? 'border-validator-yellow bg-validator-yellow/5' 
-                            : 'border-validator-red bg-validator-red/5'
-                        }`}>
-                          <div className="flex items-start space-x-3">
-                            {actionMessage.color === 'green' ? (
-                              <CheckCircle className="w-5 h-5 text-validator-green mt-0.5" />
-                            ) : actionMessage.color === 'yellow' ? (
-                              <Triangle className="w-5 h-5 text-validator-yellow mt-0.5" />
-                            ) : (
-                              <AlertTriangle className="w-5 h-5 text-validator-red mt-0.5" />
-                            )}
-                            <div className="flex-1">
-                              <div className={`font-semibold text-sm mb-1 ${
-                                actionMessage.color === 'green' 
-                                  ? 'text-validator-green' 
-                                  : actionMessage.color === 'yellow' 
-                                  ? 'text-validator-yellow' 
-                                  : 'text-validator-red'
-                              }`}>
-                                {actionMessage.title}
-                              </div>
-                              <AlertDescription className="text-xs text-gray-400">
-                                {actionMessage.action}
-                              </AlertDescription>
-                            </div>
-                            {actionMessage.showAlert && score < 80 && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleReportClick(validator.operator_address)}
-                                className="text-xs border-validator-yellow text-validator-yellow hover:bg-validator-yellow/10"
-                              >
-                                Report Incident
-                              </Button>
-                            )}
-                          </div>
-                        </Alert>
-                      </TableCell>
-                    </TableRow>
-                  </React.Fragment>
                   );
                 })
               )}

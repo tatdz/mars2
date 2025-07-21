@@ -156,9 +156,76 @@ export function useContracts() {
     },
   });
 
+  // Submit report
+  const submitReport = useMutation({
+    mutationFn: async (data: {
+      validatorAddress: string;
+      incidentType: string;
+      severity: string;
+      description: string;
+      evidence: string;
+    }) => {
+      if (!signer || !isConnected) {
+        throw new Error("Wallet not connected");
+      }
+
+      setIsSubmitting(true);
+      
+      try {
+        const contract = getContract("MarsZkAttest", signer);
+        
+        // Generate nullifier for the report
+        const nullifier = await generateNullifier(data.validatorAddress, data.incidentType);
+        
+        // Check if already reported
+        const hasAttested = await contract.hasAttested(nullifier);
+        if (hasAttested) {
+          throw new Error("You have already submitted a report for this incident");
+        }
+
+        // Calculate impact based on severity
+        const impactMap: { [key: string]: number } = {
+          low: -5,
+          medium: -15,
+          high: -25,
+          critical: -40,
+        };
+        
+        const impact = impactMap[data.severity] || -10;
+        
+        const tx = await contract.attest(
+          nullifier,
+          data.validatorAddress,
+          impact,
+          `${data.incidentType}: ${data.description}`
+        );
+        
+        await tx.wait();
+        return tx.hash;
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    onSuccess: (txHash) => {
+      toast({
+        title: "Report Submitted Successfully",
+        description: `Anonymous report submitted. Transaction: ${txHash.slice(0, 10)}...`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["validators"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Report Submission Failed",
+        description: error.message || "Failed to submit report",
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     getValidatorScore,
     submitAttestation,
+    submitReport,
     postMessage,
     revealMessage,
     messages,

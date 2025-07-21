@@ -9,7 +9,9 @@ export function Header() {
   const { address, isConnected, isConnecting, connectWallet, disconnectWallet } = useWallet();
 
   const navItems = [
-    { href: "/", label: "Validators" },
+    { href: "/", label: "Dashboard" },
+    { href: "/report", label: "Report Incident" },
+    { href: "/messaging", label: "Validator Messages" },
     { href: "/docs", label: "Docs" },
   ];
 
