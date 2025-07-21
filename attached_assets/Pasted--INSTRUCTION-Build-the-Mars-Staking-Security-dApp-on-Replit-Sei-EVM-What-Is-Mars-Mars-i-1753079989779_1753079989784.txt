@@ -1,0 +1,272 @@
+🛠️ INSTRUCTION: Build the Mars² Staking Security dApp on Replit (Sei EVM)
+🔴 What Is Mars²?
+Mars² is a real-time staking security explorer for the Sei EVM testnet. It empowers delegators, validators, and observers by making validator behavior visible, reportable, and verifiable, directly on-chain.
+
+Mars² contains:
+
+Color-coded validator scoring system
+
+Anonymous Sybil-resistant incident submission
+
+Secure, group-encrypted validator messages
+
+✔ Logo must display as “Mars²” using the Silkscreen font (Google Fonts) with regular weight (not bold).
+
+🌍 Deployed Contracts (Live on Sei EVM Testnet: Atlantic-2)
+Contract	Address
+MarsValidatorScore	0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294
+MarsZkAttest	0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae
+MarsValidatorGroupMessages	0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950
+Contract pages on the Sei block explorer:
+
+MarsValidatorScore:
+https://seitrace.com/address/0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294?chain=atlantic-2&tab=transactions
+
+MarsZkAttest:
+https://seitrace.com/address/0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae?chain=atlantic-2&tab=transactions
+
+MarsValidatorGroupMessages:
+https://seitrace.com/address/0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950?chain=atlantic-2&tab=transactions
+
+🔓 MetaMask Wallet Connect — Detailed Integration Flow
+You must:
+
+Prompt the user to connect MetaMask on page load or interaction
+
+Automatically detect signed-in state
+
+Use the connected wallet address to:
+
+Submit attestations
+
+Post messages
+
+Reveal chat messages
+
+✅ Implementation in React (ethers v6)
+js
+import { useEffect, useState } from "react";
+import { ethers } from "ethers";
+
+const [address, setAddress] = useState(null);
+
+const connectWallet = async () => {
+  if (window.ethereum) {
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    setAddress(accounts[0]);
+  }
+};
+Display a button when no wallet:
+
+jsx
+{!address && (
+  <button onClick={connectWallet}>Connect MetaMask</button>
+)}
+{address && (
+  <span>Connected: {address}</span>
+)}
+✅ Sei Testnet Chain Info (Use in MetaMask if not connected)
+Network name: Sei EVM Testnet
+
+Chain ID: 713715
+
+RPC: https://evm-rpc.testnet.sei.io
+
+Explorer: https://seitrace.com
+
+Currency: SEI
+
+🌐 What to Build: Replit Frontend Features
+✅ 1. Validator Table (ValidatorTable.jsx)
+Fetch raw validator list from:
+https://sei.explorers.guru/api/validators
+
+Score each validator client-side:
+
+js
+const scoreValidator = (v) => {
+  let score = 80;
+  if (v.jailed) score -= 40;
+  if (v.slashed) score -= 50;
+  if (v.uptime >= 99.9) score += 10;
+  if (v.missed_blocks > 10) score -= 20;
+  else if (v.missed_blocks > 3) score -= 10;
+  if (v.recent_rewards.length > 0) score += 5;
+  if (v.votes.length > 0) score += 5;
+  return Math.max(0, Math.min(100, score));
+};
+
+const scoreColor = (score) => {
+  if (score >= 80) return "green";
+  if (score >= 50) return "yellow";
+  return "red";
+};
+✅ 2. Anonymous zk-Attestation (ReportModal.jsx)
+User selects validator + event reason
+
+Client computes:
+
+js
+const nullifier = ethers.keccak256(
+  ethers.toUtf8Bytes(address + eventId)
+);
+Call this function on MarsZkAttest:
+
+js
+const contract = await ethers.getContractAt("MarsZkAttest", "0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae", signer);
+await contract.attest(nullifier, validatorAddr, -10, "missed 24 blocks in 1h");
+✅ 3. Validator Group Messaging (GroupChat.jsx)
+Fetch messages:
+
+js
+const contract = await ethers.getContractAt("MarsValidatorGroupMessages", "0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950");
+const messages = await contract.getMessages();
+Post message:
+
+js
+await contract.postMessage(ciphertext, signature); // bytes
+Reveal message:
+
+js
+await contract.revealMessage(index, "human-readable message");
+✅ 4. Advanced (Optional): Manual Score Update
+You may add a dev/admin panel to apply scores manually to MarsValidatorScore:
+
+js
+const score = await ethers.getContractAt("MarsValidatorScore", "0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294", signer);
+await score.applyScore(validatorAddr, "adminCorrection", +15);
+🧠 Required Smart Contract Behaviors
+☑ MarsValidatorScore.sol
+Tracks per-validator score (int256)
+
+Tracks per-validator event history
+
+Called by ZK, admin, or bots
+
+Interfaces:
+
+getScore(address) → current score
+
+getEvents(address) → past score changes
+
+applyScore(address, label, delta) → change score
+
+☑ MarsZkAttest.sol
+attest(bytes32 nullifier, address validator, int256 impact, string reason)
+
+Records 1 attestation per wallet per incident
+
+Automatically calls MarsValidatorScore to update score
+
+☑ MarsValidatorGroupMessages.sol
+postMessage(bytes ciphertext, bytes signature)
+
+revealMessage(uint index, string plaintext)
+
+getMessages() → returns all encrypted messages
+
+🎨 Font + Branding Requirements
+Add to public/index.html:
+
+xml
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Silkscreen', monospace;
+    font-weight: 400;
+  }
+</style>
+Render “Mars²” in Silkscreen (non-bold) in the site header.
+
+📁 File Structure
+text
+/src
+  /components
+    ValidatorTable.jsx
+    ReportModal.jsx
+    GroupChat.jsx
+  constants.js
+  utils/crypto.js
+App.jsx
+/docs   ← Documentation structure here
+📄 Required /docs Documentation Page or Route
+Full documentation must be available as a separate React route or markdown content.
+
+Section 1: Problem Statement
+Validators on Sei often miss blocks or become jailed. Stakers cannot report or respond securely. Mars² solves this with scoring, reporting, and encrypted coordination.
+
+Section 2: Mission
+To give delegators real-time staking intelligence and give validators encrypted onchain channels—improving security for the entire Sei network.
+
+Section 3: Key Features
+Automated validator risk scoring
+
+Anonymous, Sybil-resistant incident reports
+
+Encrypted validator group messages — stored and optionally revealed on-chain
+
+Section 4: Deployed Contract Addresses + Links
+MarsValidatorScore.sol:
+Address: 0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294
+Link: https://seitrace.com/address/0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294?chain=atlantic-2&tab=transactions
+
+MarsZkAttest.sol:
+Address: 0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae
+Link: https://seitrace.com/address/0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae?chain=atlantic-2&tab=transactions
+
+MarsValidatorGroupMessages.sol:
+Address: 0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950
+Link: https://seitrace.com/address/0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950?chain=atlantic-2&tab=transactions
+
+Section 5: Tech Stack
+Frontend: React + ethers.js v6
+
+Wallet: MetaMask
+
+Contracts: Solidity 0.8.28 via Hardhat
+
+Offchain Crypto: AES-256 encryption + Ed25519 signatures
+
+RPC: https://evm-rpc.testnet.sei.io
+
+Data Feed: https://sei.explorers.guru/api/validators
+
+Section 6: User Journey
+Connect wallet
+
+Browse validator scores
+
+Submit an anonymous report (once per event)
+
+Reveal message if score <50 and encrypted warning was posted
+
+View final audit log in MarsValidatorScore
+
+Section 7: Color Code Legend
+Score	Color	Action Suggested
+80–100	Green	Stake freely
+50–79	Yellow	Monitor closely
+0–49	Red	Unstake
+Section 8: Troubleshooting
+"Attest already exists": nullifier is reused
+
+Message not revealed: already revealed or invalid index
+
+Wallet not connected: add Sei EVM testnet in MetaMask
+
+✔ What Replit Must Deliver
+ React frontend dApp (MetaMask-connected)
+
+ Validator table with live scores & color codes
+
+ Incident report modal (one-per-user-per-event attestation)
+
+ Validator messages feed + reveal logic
+
+ /docs route with all technical and product documentation
+
+ Mars² logo in Silkscreen, non-bold
+
+ Correct interaction with all 3 deployed contracts
+
+Once this is complete, the frontend dApp will provide a one-stop validator dashboard and collaboration tool for the Sei EVM testnet.
