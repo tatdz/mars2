@@ -143,7 +143,7 @@ const docSections = [
       sections: [
         {
           title: "Smart Contracts",
-          content: "Mars² uses three main contracts on Sei EVM:\n• MarsValidatorScore: 0x1234...abcd - Validator scoring and updates\n• MarsZkAttest: 0x5678...efgh - Anonymous incident reporting\n• MarsGroupMsg: 0x9abc...ijkl - Encrypted group messaging\n\nContract links:\n• Sei Explorer: https://seitrace.com\n• GitHub Repository: https://github.com/mars-protocol/contracts"
+          content: "Mars² uses three main contracts on Sei EVM:\n\n• MarsValidatorScore: 0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294\n  Validator scoring and updates\n  https://seitrace.com/address/0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294?chain=atlantic-2&tab=transactions\n\n• MarsZkAttest: 0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae\n  Anonymous incident reporting\n  https://seitrace.com/address/0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae?chain=atlantic-2&tab=transactions\n\n• MarsValidatorGroupMessages: 0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950\n  Encrypted group messaging\n  https://seitrace.com/address/0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950?chain=atlantic-2&tab=transactions"
         },
         {
           title: "Data Sources",

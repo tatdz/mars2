@@ -119,3 +119,21 @@ Preferred communication style: Simple, everyday language.
 - **Problem**: Multiple contracts with different interaction patterns
 - **Solution**: Centralized contract factory with typed ABIs
 - **Rationale**: Type safety and maintainable contract management
+
+## Recent Changes: Latest modifications with dates
+
+### 2025-07-21: Major UI/UX Improvements
+- **Network Stats Layout**: Changed from vertical to horizontal layout to save space and improve visual balance
+- **Report Page Design**: Enhanced with colorful futuristic gradients and improved readability
+  - Added gradient backgrounds to all sidebar cards
+  - Improved badge styling with emojis and shadow effects
+  - Enhanced text contrast for better readability
+- **Messaging Page**: Fixed Generate/Import text colors to white for proper visibility
+- **Documentation Updates**: Added real smart contract addresses and Seitrace explorer links
+- **Contract Addresses Added**:
+  - MarsValidatorScore: 0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294
+  - MarsZkAttest: 0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae
+  - MarsValidatorGroupMessages: 0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950
+- **Validator Selection**: Added dropdown with validator names and addresses for better UX
+- **Form Validation**: Reduced minimum description requirement from 20 to 10 characters
+- **README.md**: Created comprehensive documentation with contract addresses and setup instructions

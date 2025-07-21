@@ -162,10 +162,10 @@ export function MessagingPage() {
         <div className="lg:col-span-1">
           <Tabs defaultValue="generate" className="space-y-4">
             <TabsList className="grid w-full grid-cols-2 bg-dark-card">
-              <TabsTrigger value="generate" className="data-[state=active]:bg-purple-accent">
+              <TabsTrigger value="generate" className="data-[state=active]:bg-purple-accent text-white">
                 Generate
               </TabsTrigger>
-              <TabsTrigger value="import" className="data-[state=active]:bg-purple-accent">
+              <TabsTrigger value="import" className="data-[state=active]:bg-purple-accent text-white">
                 Import
               </TabsTrigger>
             </TabsList>
