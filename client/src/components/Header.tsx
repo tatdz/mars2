@@ -2,14 +2,10 @@ import { Link, useLocation } from "wouter";
 import { useWallet } from "@/hooks/useWallet";
 import { Button } from "@/components/ui/button";
 import { formatAddress } from "@/lib/crypto";
-import { RefreshCw, MessageCircle } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { AnimatedMarsLogo } from "@/components/AnimatedMarsLogo";
 
-interface HeaderProps {
-  onChatToggle?: () => void;
-}
-
-export function Header({ onChatToggle }: HeaderProps) {
+export function Header() {
   const [location] = useLocation();
   const { address, isConnected, isConnecting, connectWallet, disconnectWallet } = useWallet();
 
@@ -50,21 +46,8 @@ export function Header({ onChatToggle }: HeaderProps) {
             ))}
           </nav>
 
-          {/* Chat and Wallet Connection */}
+          {/* Wallet Connection */}
           <div className="flex items-center space-x-4">
-            {/* Chat Button */}
-            {onChatToggle && (
-              <Button
-                onClick={onChatToggle}
-                variant="outline"
-                size="sm"
-                className="bg-purple-accent/10 border-purple-accent text-purple-accent hover:bg-purple-accent hover:text-white transition-colors"
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Chat
-              </Button>
-            )}
-            
             {isConnected && address ? (
               <div className="flex items-center space-x-2 bg-dark-card px-3 py-2 rounded-lg">
                 <div className="w-2 h-2 bg-validator-green rounded-full"></div>
