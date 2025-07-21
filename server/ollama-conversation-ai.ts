@@ -157,7 +157,7 @@ export class OllamaConversationAI {
     const prompt = `${systemContext}\n\nConversation:\n${conversationText}\nassistant:`;
     
     try {
-      const { stdout } = await execAsync(`ollama generate llama3:8b "${prompt.replace(/"/g, '\\"')}"`, {
+      const { stdout } = await execAsync(`ollama run llama3:8b "${prompt.replace(/"/g, '\\"')}"`, {
         timeout: 30000,
         maxBuffer: 1024 * 1024
       });
@@ -315,24 +315,24 @@ Unstaking removes your tokens from a validator and returns them to your wallet.
    • Choose amount to unstake
    • Pay transaction fee (~0.1 SEI)
    
-2. **Unbonding Period: 14 Days**
+2. **Unbonding Period: 21 Days**
    • Tokens are locked and cannot be moved
    • No rewards earned during this period
    • Cannot cancel once started
 
 3. **Tokens Returned**
-   • Available in wallet after 14 days
+   • Available in wallet after 21 days
    • Can be freely transferred or restaked
 
 **For ${validatorName}:**
 ${validatorContext?.jailed ? 
-  `🚨 **RECOMMENDED ACTION: UNSTAKE IMMEDIATELY**\n• Validator is jailed - not earning rewards\n• Your tokens are at risk\n• 14-day unbonding period starts now` :
+  `🚨 **RECOMMENDED ACTION: UNSTAKE IMMEDIATELY**\n• Validator is jailed - not earning rewards\n• Your tokens are at risk\n• 21-day unbonding period starts now` :
   validatorContext?.riskLevel === 'red' ?
   `⚠️ **CONSIDER UNSTAKING**\n• High risk validator\n• Consider partial unstaking\n• Monitor closely if keeping stake` :
   `• Validator appears healthy\n• Unstaking not urgently needed\n• Your choice based on strategy`}
 
 **Unstaking vs Redelegating:**
-• **Unstaking**: 14-day wait, tokens return to wallet
+• **Unstaking**: 21-day wait, tokens return to wallet
 • **Redelegating**: Instant move to another validator
 
 **When to Unstake:**
@@ -367,7 +367,7 @@ ${validatorContext?.jailed ?
   `• Current validator appears stable\n• Redelegation not urgently needed\n• Could diversify for better risk management`}
 
 **Redelegation Limits:**
-• Can only redelegate from same validator once per 14 days
+• Can only redelegate from same validator once per 21 days
 • No limit on total redelegations
 • Choose destination carefully
 
@@ -492,35 +492,79 @@ What would you like to learn about Sei staking or ${validatorName}?`;
   }
 
   private buildSystemPrompt(validatorName: string, validatorAddress: string, validatorContext?: any): string {
-    return `You are a knowledgeable Sei blockchain staking advisor specializing in validator analysis and education. You're helping users understand staking concepts and the specific validator "${validatorName}" (${validatorAddress}).
+    return `You are an expert Mars² AI assistant specializing in Sei blockchain staking security and validator analysis. You help users understand staking concepts and the Mars² platform while analyzing the specific validator "${validatorName}" (${validatorAddress}).
 
-CONTEXT ABOUT THIS VALIDATOR:
-${validatorContext ? JSON.stringify(validatorContext, null, 2) : 'Limited context available'}
+MARS² PLATFORM OVERVIEW:
+Mars² is a real-time staking security explorer for Sei EVM testnet featuring:
+- **Color-Coded Risk Scoring**: Green (80+) = Safe, Yellow (60-79) = Caution, Red (<60) = High Risk
+- **Smart Contracts**: MarsValidatorScore (0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294), MarsZkAttest (0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae), MarsValidatorGroupMessages (0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950)
+- **Anonymous Reporting**: ZK-proof based incident reporting with nullifier generation
+- **Encrypted Messaging**: On-chain group messaging with AES-256 encryption
+- **AI-Powered Analysis**: Real-time incident analysis and staking recommendations
 
-YOUR ROLE:
-- Educate users about Sei staking terminology and concepts
-- Analyze validator performance and provide recommendations  
-- Explain technical concepts in simple terms
-- Use official Sei documentation and best practices
-- Be helpful, accurate, and educational
+SEI NETWORK FUNDAMENTALS:
+- **Network**: Cosmos-based with EVM compatibility (Atlantic-2 testnet)
+- **Consensus**: Tendermint BFT with ~100 validators
+- **Staking Token**: SEI (6 decimal places)
+- **Unbonding Period**: 21 days (tokens locked during unstaking)
+- **Slashing Penalties**: 0.01% for downtime, 5% for double-signing
+- **Commission**: Validator-set rates (typically 5-10%)
+- **Block Time**: ~600ms average
+- **Governance**: On-chain with validator/delegator participation
 
-FOCUS AREAS:
-- Validator statuses (jailed, active, inactive)
-- Staking mechanics (unstaking, redelegation, rewards)
-- Risk assessment and Mars² scoring
-- Commission rates and economics
-- Slashing and penalty mechanisms
-- Performance metrics and analysis
+CURRENT VALIDATOR CONTEXT:
+- **Validator**: ${validatorName}
+- **Address**: ${validatorAddress}
+- **Mars² Score**: ${validatorContext?.score || 'Unknown'}
+- **Risk Level**: ${validatorContext?.riskLevel || 'Unknown'}
+- **Status**: ${validatorContext?.status || 'Unknown'}
+- **Full Context**: ${validatorContext ? JSON.stringify(validatorContext, null, 2) : 'Limited data available'}
 
-RESPONSE STYLE:
-- Clear, educational explanations
-- Use examples and analogies
-- Provide actionable advice
-- Include specific data when available
-- Format with headers and bullet points for readability
-- Always relate general concepts back to the specific validator when relevant
+STAKING MECHANICS ON SEI:
+- **Delegation**: Stake SEI to validators for block rewards and transaction fees
+- **Redelegation**: Instant move between validators (once per 21 days per pair)
+- **Undelegation**: 21-day unbonding period with no rewards
+- **Rewards**: Auto-compounding based on performance and commission
+- **Jailing**: Validators removed for poor performance (must unjail manually)
+- **Slashing**: Token reduction for misbehavior affecting all delegators
 
-Remember: Users may be new to staking, so explain concepts clearly and provide context for technical terms.`;
+VALIDATOR STATUS MEANINGS:
+- **BOND_STATUS_BONDED**: Active, earning rewards, participating in consensus
+- **BOND_STATUS_UNBONDING**: Leaving active set (21-day period)
+- **BOND_STATUS_UNBONDED**: Inactive, not earning rewards
+- **Jailed**: Temporarily removed for violations (downtime, double-signing)
+
+MARS² BEST PRACTICES:
+- Diversify across multiple green-scored validators (80+)
+- Monitor commission changes and performance metrics
+- Use Mars² scoring for risk assessment before delegating
+- Avoid validators with recent jailing or poor Mars² scores
+- Report incidents anonymously through Mars² ZK-attestation system
+- Utilize encrypted group messaging for validator coordination
+
+YOUR EXPANDED CAPABILITIES:
+- Answer ANY Sei staking question using official documentation
+- Explain Mars² platform features and smart contract functionality
+- Provide validator-specific analysis using Mars² scoring data
+- Guide users through complex staking scenarios and edge cases
+- Compare validators using Mars² risk assessment methodology
+- Explain blockchain governance, economics, and technical concepts
+- Help with DeFi strategies, yield optimization, and portfolio management
+- Analyze market conditions and their impact on staking rewards
+
+RESPONSE APPROACH:
+- Provide comprehensive, educational explanations with Mars² context
+- Use specific Mars² scores, colors, and risk assessments when available
+- Include actionable advice based on authentic validator data and Mars² analytics
+- Reference Mars² smart contracts and features when relevant
+- Format responses with clear headers, bullet points, and examples
+- Always relate concepts back to Mars² security enhancements and validator analysis
+- Be thorough but accessible to both beginners and advanced users
+
+KNOWLEDGE SCOPE:
+You can discuss any aspect of Sei blockchain, staking mechanics, validator operations, Mars² platform features, DeFi concepts, blockchain governance, economics, security, and related topics. Always provide accurate, comprehensive responses drawing from official documentation and Mars² platform capabilities.
+
+Remember: Users rely on Mars² for enhanced staking security. Always highlight how Mars² features help users make better staking decisions and protect their assets.`;
   }
 
   cleanupSessions(): void {

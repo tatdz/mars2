@@ -359,7 +359,7 @@ export function StakingRecommendations() {
                             disabled={loading}
                           >
                             <Zap className="w-3 h-3 mr-1" />
-                            Ask AI
+                            Details
                           </Button>
                           <Button
                             size="sm"
@@ -373,18 +373,7 @@ export function StakingRecommendations() {
                         </div>
                       )}
                       
-                      {/* Education chat button for all validators */}
-                      <div className="mt-2">
-                        <Button
-                          size="sm"
-                          onClick={() => startConversation(delegation.validator_name, delegation.validator_address, delegation)}
-                          className="w-full bg-blue-600 text-white hover:bg-blue-700 border-0"
-                          disabled={loading}
-                        >
-                          <MessageCircle className="w-3 h-3 mr-1" />
-                          Learn About Staking & This Validator
-                        </Button>
-                      </div>
+
                     </div>
                   ))}
                 </div>
