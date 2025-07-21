@@ -171,6 +171,17 @@ export function StakingRecommendations() {
       setLoading(true);
       setError(null);
       
+      // Map known validator names to their real Sei addresses
+      const validatorAddressMap: { [key: string]: string } = {
+        'RHINO': 'seivaloper146m089lq8mkqw6w0mmlhxz6247g2taha89at74',
+        'Blockscope': 'seivaloper14u38cl6knqxs6vs7lj7vzfvap42yyc3runtrwc',
+        'TestRisk': 'seivaloper1testvalidatoraddress123456789',
+        'RiskyValidator': 'seivaloper1demovalidatoraddress123456789'
+      };
+      
+      const validatorAddress = validatorAddressMap[validatorName] || 
+                              `seivaloper1${validatorName.toLowerCase().replace(/[^a-z0-9]/g, '')}example`;
+      
       const response = await fetch('/api/eliza/incidents', {
         method: 'POST',
         headers: {
@@ -178,7 +189,7 @@ export function StakingRecommendations() {
         },
         body: JSON.stringify({
           validatorName,
-          validatorAddress: `sei_validator_${validatorName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+          validatorAddress,
           userQuestion: `What incidents have affected ${validatorName} and should I be concerned about my stake?`
         }),
       });
