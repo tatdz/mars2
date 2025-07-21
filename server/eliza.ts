@@ -6,8 +6,11 @@ export class ElizaStakingAgent {
   private marsContract: ethers.Contract;
 
   constructor() {
-    // Initialize Sei EVM testnet provider
-    this.provider = new ethers.JsonRpcProvider("https://evm-rpc.testnet.sei.io");
+    // Initialize Sei EVM testnet provider with timeout
+    this.provider = new ethers.JsonRpcProvider("https://evm-rpc.testnet.sei.io", undefined, {
+      timeout: 3000, // 3 second timeout
+      pollingInterval: 2000
+    });
     
     // Mars² Validator Score contract
     const marsContractABI = [
@@ -20,17 +23,27 @@ export class ElizaStakingAgent {
     );
   }
 
-  // Fetch user's current delegations from Sei REST API
+  // Fetch user's current delegations from Sei REST API with timeout
   async getUserDelegations(userAddress: string): Promise<any[]> {
     try {
-      const response = await fetch(`https://sei.explorers.guru/api/accounts/${userAddress}/delegations`);
+      // Add timeout for API call
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+      
+      const response = await fetch(
+        `https://sei.explorers.guru/api/accounts/${userAddress}/delegations`,
+        { signal: controller.signal }
+      );
+      
+      clearTimeout(timeoutId);
+      
       if (!response.ok) {
         throw new Error(`API request failed: ${response.statusText}`);
       }
       const data = await response.json();
       return data.delegations || [];
     } catch (error) {
-      console.warn('Failed to fetch real delegations, using demo data:', error);
+      console.warn('Failed to fetch real delegations, using demo data:', error.message || error);
       
       // Return demo delegations with real problematic validators from Sei API
       return [
@@ -59,13 +72,20 @@ export class ElizaStakingAgent {
     }
   }
 
-  // Fetch Mars² score for a specific validator
+  // Fetch Mars² score for a specific validator with timeout
   async getValidatorScore(validatorAddress: string): Promise<number> {
     try {
-      const score = await this.marsContract.getScore(validatorAddress);
+      // Add timeout wrapper for contract calls
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Contract call timeout')), 2000); // 2 second timeout
+      });
+      
+      const scorePromise = this.marsContract.getScore(validatorAddress);
+      const score = await Promise.race([scorePromise, timeoutPromise]);
       return Number(score);
     } catch (error) {
-      console.warn(`Failed to fetch Mars² score for ${validatorAddress}:`, error);
+      // Fail fast and use simulated scores
+      console.warn(`Failed to fetch Mars² score for ${validatorAddress}:`, error.message || error);
       
       // Return simulated scores for real jailed validators
       if (validatorAddress === "seivaloper1qdmt7sq86mawwq62gl3w9aheu3ak3vtqgjp8mm") return 25; // Enigma - jailed, critical
@@ -239,30 +259,50 @@ export class ElizaStakingAgent {
       const delegations = await this.getUserDelegations(userAddress);
       console.log(`Found ${delegations.length} delegations`);
 
-      // 2. Fetch Mars² scores and generate recommendations for each
-      const recommendations = await Promise.all(
+      // 2. Fetch Mars² scores with fast timeout and parallel processing
+      const recommendations = await Promise.allSettled(
         delegations.map(async (delegation: any) => {
-          const score = await this.getValidatorScore(delegation.validator_address);
-          const aiRecommendation = this.generateRecommendation(score);
+          // Add overall timeout for each validator processing
+          const processingTimeout = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Validator processing timeout')), 3000);
+          });
           
-          return {
-            validator_address: delegation.validator_address,
-            validator_name: delegation.validator?.description?.moniker || 'Unknown Validator',
-            staked_amount: this.formatSeiAmount(delegation.shares),
-            mars_score: score,
-            recommendation: aiRecommendation.recommendation,
-            risk_level: aiRecommendation.riskLevel,
-            callbacks: {
-              unstake: `unstake_${delegation.validator?.description?.moniker?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'validator'}`,
-              redelegate: `redelegate_${delegation.validator?.description?.moniker?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'validator'}`,
-              incidents: `incidents_${delegation.validator?.description?.moniker?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'validator'}`
-            }
+          const processValidator = async () => {
+            const score = await this.getValidatorScore(delegation.validator_address);
+            const aiRecommendation = this.generateRecommendation(score);
+            
+            return {
+              validator_address: delegation.validator_address,
+              validator_name: delegation.validator?.description?.moniker || 'Unknown Validator',
+              staked_amount: this.formatSeiAmount(delegation.shares),
+              mars_score: score,
+              recommendation: aiRecommendation.recommendation,
+              risk_level: aiRecommendation.riskLevel,
+              callbacks: {
+                unstake: `unstake_${delegation.validator?.description?.moniker?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'validator'}`,
+                redelegate: `redelegate_${delegation.validator?.description?.moniker?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'validator'}`,
+                incidents: `incidents_${delegation.validator?.description?.moniker?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'validator'}`
+              }
+            };
           };
+          
+          return Promise.race([processValidator(), processingTimeout]);
         })
       );
 
-      // 3. Generate AI summary
-      const highRiskDelegations = recommendations.filter(r => r.risk_level === 'red');
+      // Extract successful results and handle failed ones
+      const validRecommendations = recommendations
+        .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+        .map(result => result.value);
+      
+      // Log any failures
+      const failedCount = recommendations.filter(result => result.status === 'rejected').length;
+      if (failedCount > 0) {
+        console.warn(`${failedCount} validator(s) failed to process due to timeouts`);
+      }
+
+      // 3. Generate AI summary using valid recommendations
+      const highRiskDelegations = validRecommendations.filter(r => r.risk_level === 'red');
       const totalAtRisk = highRiskDelegations.reduce((sum, r) => {
         const amount = parseFloat(r.staked_amount.replace(/[^\d.]/g, ''));
         return sum + (isNaN(amount) ? 0 : amount);
@@ -278,11 +318,20 @@ export class ElizaStakingAgent {
       }
 
       return {
-        delegations: recommendations,
+        delegations: validRecommendations,
         summary,
         total_at_risk: `${totalAtRisk.toLocaleString()} SEI`,
         user_address: userAddress,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        analysis: {
+          total_delegations: delegations.length,
+          processed_delegations: validRecommendations.length,
+          failed_delegations: failedCount,
+          high_risk_count: highRiskDelegations.length,
+          avg_score: validRecommendations.length > 0 
+            ? Math.round(validRecommendations.reduce((sum, r) => sum + r.mars_score, 0) / validRecommendations.length)
+            : 0
+        }
       };
 
     } catch (error) {
