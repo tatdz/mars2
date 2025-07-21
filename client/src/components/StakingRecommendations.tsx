@@ -171,12 +171,13 @@ export function StakingRecommendations() {
       setLoading(true);
       setError(null);
       
-      // Map known validator names to their real Sei addresses
+      // Map known validator names to their real Sei addresses from seitrace.com
       const validatorAddressMap: { [key: string]: string } = {
         'RHINO': 'seivaloper146m089lq8mkqw6w0mmlhxz6247g2taha89at74',
         'Blockscope': 'seivaloper14u38cl6knqxs6vs7lj7vzfvap42yyc3runtrwc',
-        'TestRisk': 'seivaloper1testvalidatoraddress123456789',
-        'RiskyValidator': 'seivaloper1demovalidatoraddress123456789'
+        'Four Pillars': 'seivaloper1n8dkzn66f9ys8kfcdsmrtcz9003ummhxxe6g23',
+        'ContributionDAO': 'seivaloper10hg23nf7eejwvthlad096x95pq84g4wnnwjtzq',
+        'Binance Node': 'seivaloper1x0c99e8huemhcjhue4np8c805w9k8nnvsccmff'
       };
       
       const validatorAddress = validatorAddressMap[validatorName] || 
