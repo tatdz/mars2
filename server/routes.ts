@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { ElizaStakingAgent } from "./eliza";
 import { ChatAgent } from "./chat-agent";
 import { IncidentAI } from "./incident-ai";
+import { SeiIncidentAI } from "./sei-incident-ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add CORS headers for API routes
@@ -211,41 +212,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Enhanced AI incidents analysis endpoint with onchain data
+  // Enhanced AI incidents analysis endpoint using real Sei API data
   app.post('/api/eliza/incidents', async (req, res) => {
     try {
-      const { validatorName, validatorAddress, userQuestion = "What incidents have affected this validator?" } = req.body;
+      const { validatorAddress, validatorName, userAddress } = req.body;
+      console.log(`Generating AI incident analysis for ${validatorName} (${validatorAddress})`);
       
-      if (!validatorName) {
+      if (!validatorAddress) {
         return res.status(400).json({
           error: 'Invalid request',
-          message: 'validatorName is required'
+          message: 'validatorAddress is required'
         });
       }
-
-      console.log(`Generating AI incident analysis for ${validatorName}`);
       
-      // Fetch comprehensive incident data from onchain sources
-      const incidentData = await incidentAI.fetchValidatorIncidentData(
-        validatorAddress || 'demo_address', 
-        validatorName
-      );
-      
-      // Generate intelligent analysis using the incident AI
-      const analysis = await incidentAI.generateIncidentAnalysis(incidentData, userQuestion);
+      const seiIncidentAI = new SeiIncidentAI();
+      const analysis = await seiIncidentAI.analyzeValidator(validatorAddress);
       
       res.json({
         id: `incident_${Date.now()}`,
         role: 'assistant',
-        content: analysis,
-        timestamp: Date.now(),
-        validatorData: incidentData
+        message: analysis.aiAnalysis,
+        validatorData: {
+          currentScore: analysis.currentScore,
+          riskLevel: analysis.riskLevel,
+          events: analysis.incidents,
+          performanceMetrics: analysis.performanceMetrics,
+          uptime: analysis.performanceMetrics.uptime
+        },
+        timestamp: new Date().toISOString()
       });
     } catch (error: any) {
-      console.error('Error generating AI incident analysis:', error);
-      res.status(500).json({
-        error: 'Failed to generate incident analysis',
-        message: error.message
+      console.error('Error analyzing validator:', error);
+      res.status(500).json({ 
+        error: 'Failed to analyze validator incidents',
+        message: 'Unable to fetch validator data from Sei network. Please try again later.'
       });
     }
   });

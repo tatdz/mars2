@@ -171,17 +171,18 @@ export function StakingRecommendations() {
       setLoading(true);
       setError(null);
       
-      // Map known validator names to their real Sei addresses from seitrace.com
+      // Map known validator names to their real Sei addresses from Sei API
       const validatorAddressMap: { [key: string]: string } = {
-        'RHINO': 'seivaloper146m089lq8mkqw6w0mmlhxz6247g2taha89at74',
-        'Blockscope': 'seivaloper14u38cl6knqxs6vs7lj7vzfvap42yyc3runtrwc',
+        'Enigma': 'seivaloper1qdmt7sq86mawwq62gl3w9aheu3ak3vtqgjp8mm',
+        'STAKEME': 'seivaloper1q0ejqj0mg76cq2885rf6qrwvtht3nqgd9sy5rw',
+        'Forbole': 'seivaloper1q3eq77eam27armtmcr7kft3m7350a30jhgwf26',
         'Four Pillars': 'seivaloper1n8dkzn66f9ys8kfcdsmrtcz9003ummhxxe6g23',
         'ContributionDAO': 'seivaloper10hg23nf7eejwvthlad096x95pq84g4wnnwjtzq',
         'Binance Node': 'seivaloper1x0c99e8huemhcjhue4np8c805w9k8nnvsccmff'
       };
       
       const validatorAddress = validatorAddressMap[validatorName] || 
-                              `seivaloper1${validatorName.toLowerCase().replace(/[^a-z0-9]/g, '')}example`;
+                              `seivaloper1${validatorName.toLowerCase().replace(/[^a-z0-9]/g, '')}demo`;
       
       const response = await fetch('/api/eliza/incidents', {
         method: 'POST',
@@ -191,7 +192,7 @@ export function StakingRecommendations() {
         body: JSON.stringify({
           validatorName,
           validatorAddress,
-          userQuestion: `What incidents have affected ${validatorName} and should I be concerned about my stake?`
+          userAddress: address
         }),
       });
 
@@ -380,7 +381,7 @@ export function StakingRecommendations() {
             <div className="p-6 max-h-[70vh] overflow-y-auto">
               <div className="bg-dark-bg rounded-lg p-6 border border-gray-600">
                 <div className="prose prose-invert max-w-none">
-                  {aiResponse.content.split('\n').map((line: string, i: number) => {
+                  {aiResponse.message ? aiResponse.message.split('\n').map((line: string, i: number) => {
                     if (line.startsWith('**') && line.endsWith('**')) {
                       return (
                         <h3 key={i} className="text-white font-semibold text-lg mb-2 mt-4">
@@ -414,42 +415,10 @@ export function StakingRecommendations() {
                       <p key={i} className="text-gray-200 mb-2 leading-relaxed">
                         {line}
                       </p>
-                    ) : (
-                      <div key={i} className="mb-2">&nbsp;</div>
-                    );
-                  })}
+                    ) : null;
+                  }) : <p className="text-gray-400">No content available</p>}
                 </div>
               </div>
-              
-              {aiResponse.validatorData && (
-                <div className="mt-4 p-4 bg-dark-bg rounded-lg border border-gray-600">
-                  <h4 className="text-white font-medium mb-2">Technical Data</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-400">Current Score:</span>
-                      <span className="text-white ml-2">{aiResponse.validatorData.currentScore}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Risk Level:</span>
-                      <span className={`ml-2 ${
-                        aiResponse.validatorData.riskLevel === 'green' ? 'text-validator-green' :
-                        aiResponse.validatorData.riskLevel === 'yellow' ? 'text-validator-yellow' :
-                        'text-validator-red'
-                      }`}>
-                        {aiResponse.validatorData.riskLevel.toUpperCase()}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Total Incidents:</span>
-                      <span className="text-white ml-2">{aiResponse.validatorData.events.length}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Uptime:</span>
-                      <span className="text-white ml-2">{aiResponse.validatorData.performanceMetrics.uptime.toFixed(1)}%</span>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="p-4 border-t border-gray-700 flex justify-between items-center">
