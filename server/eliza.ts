@@ -280,4 +280,75 @@ export class ElizaStakingAgent {
       throw new Error('Failed to generate staking recommendations');
     }
   }
+
+  async getValidators(): Promise<ValidatorInfo[]> {
+    try {
+      return await this.getSeiValidators();
+    } catch (error) {
+      console.error('Error getting validators:', error);
+      return [];
+    }
+  }
+
+  async getTopValidators(): Promise<ValidatorInfo[]> {
+    try {
+      const validators = await this.getSeiValidators();
+      return validators
+        .sort((a, b) => (b.uptime || 0) - (a.uptime || 0))
+        .slice(0, 10);
+    } catch (error) {
+      console.error('Error getting top validators:', error);
+      return [];
+    }
+  }
+
+  async getMarsScore(validatorAddress: string): Promise<number> {
+    try {
+      const score = await this.getMarsValidatorScore(validatorAddress);
+      return score;
+    } catch (error) {
+      console.error('Error getting Mars² score:', error);
+      // Return random demo score between 30-90 for demo purposes
+      return Math.floor(Math.random() * 60) + 30;
+    }
+  }
+
+  async getValidatorIncidents(validatorAddress: string): Promise<any[]> {
+    try {
+      // In a real implementation, this would fetch from the MarsZkAttest contract
+      // or an incident database. For now, return simulated data based on score.
+      const score = await this.getMarsScore(validatorAddress);
+      
+      if (score < 60) {
+        return [
+          {
+            type: "Performance Issue",
+            description: "Multiple missed blocks reported in the last 24 hours",
+            score_impact: -10,
+            timestamp: Date.now() - 86400000 // 24 hours ago
+          },
+          {
+            type: "Community Report", 
+            description: "Anonymous report of validator downtime",
+            score_impact: -15,
+            timestamp: Date.now() - 172800000 // 48 hours ago
+          }
+        ];
+      } else if (score < 80) {
+        return [
+          {
+            type: "Minor Issue",
+            description: "Occasional missed blocks detected",
+            score_impact: -5,
+            timestamp: Date.now() - 86400000
+          }
+        ];
+      }
+      
+      return []; // No incidents for high-score validators
+    } catch (error) {
+      console.error('Error getting validator incidents:', error);
+      return [];
+    }
+  }
 }

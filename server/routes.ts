@@ -207,6 +207,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI incidents analysis endpoint
+  app.post('/api/eliza/incidents', async (req, res) => {
+    try {
+      const { validatorName, score, userAddress } = req.body;
+      
+      if (!validatorName || !userAddress) {
+        return res.status(400).json({
+          error: 'Invalid request',
+          message: 'validatorName and userAddress are required'
+        });
+      }
+
+      console.log(`Generating AI incident analysis for ${validatorName} (score: ${score})`);
+      
+      // Generate detailed incident analysis using ChatAgent
+      const analysisMessage = `Analyze the incidents and risk factors for validator ${validatorName} which has a Mars² score of ${score}. Provide a detailed report of what happened, why the score is low, and specific recommendations.`;
+      
+      const sessionId = `incidents_${Date.now()}`;
+      const response = await chatAgent.processMessage(sessionId, analysisMessage, userAddress);
+      
+      res.json(response);
+    } catch (error: any) {
+      console.error('Error generating AI incident analysis:', error);
+      res.status(500).json({
+        error: 'Failed to generate incident analysis',
+        message: error.message
+      });
+    }
+  });
+
   // Cleanup old chat sessions periodically
   setInterval(() => {
     chatAgent.cleanupSessions();

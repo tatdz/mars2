@@ -35,7 +35,11 @@ export function ValidatorTable() {
             <p className="text-gray-400 mb-4">
               Unable to fetch validator data from the Sei network.
             </p>
-            <Button onClick={() => refetch()} variant="outline">
+            <Button 
+              onClick={() => refetch()} 
+              variant="outline"
+              className="bg-white text-black border-gray-300 hover:bg-gray-100"
+            >
               <RefreshCw className="w-4 h-4 mr-2" />
               Retry
             </Button>

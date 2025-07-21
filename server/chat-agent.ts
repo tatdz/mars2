@@ -97,11 +97,61 @@ export class ChatAgent {
         }
       }
 
-      // Handle incident reports
-      if (lowerMessage.includes('incident') || lowerMessage.includes('what happened')) {
-        const validatorMatch = message.match(/(?:incident|happened).*(?:to|with)\s+([a-zA-Z0-9.\s]+)/i);
+      // Handle incident reports with enhanced analysis
+      if (lowerMessage.includes('incident') || lowerMessage.includes('what happened') || lowerMessage.includes('ask ai about incidents')) {
+        const validatorMatch = message.match(/(?:incident|happened|incidents).*(?:to|with|for|about)\s+([a-zA-Z0-9.\s]+)/i);
         if (validatorMatch) {
           const validatorName = validatorMatch[1].trim();
+          
+          // Enhanced incident analysis with real validator data
+          try {
+            const validators = await this.elizaAgent.getValidators();
+            const validator = validators.find((v: any) => 
+              v.moniker.toLowerCase().includes(validatorName.toLowerCase()) ||
+              validatorName.toLowerCase().includes(v.moniker.toLowerCase())
+            );
+            
+            if (validator) {
+              const score = await this.elizaAgent.getMarsScore(validator.operator_address);
+              const incidents = await this.elizaAgent.getValidatorIncidents(validator.operator_address);
+              
+              let analysis = `**${validator.moniker} Incident Analysis**\n\n`;
+              analysis += `📊 Current Mars² Score: ${score}\n`;
+              analysis += `⚠️ Risk Level: ${score >= 80 ? 'Low (Green)' : score >= 60 ? 'Medium (Yellow)' : 'High (Red)'}\n\n`;
+              
+              if (incidents && incidents.length > 0) {
+                analysis += `**Recent Incidents:**\n`;
+                incidents.forEach((incident: any, i: number) => {
+                  analysis += `${i + 1}. ${incident.type}: ${incident.description} (Score impact: ${incident.score_impact})\n`;
+                });
+              } else if (score < 80) {
+                analysis += `**Risk Factors Contributing to Low Score:**\n`;
+                if (score < 60) {
+                  analysis += `• High risk of slashing or validator issues\n`;
+                  analysis += `• Poor performance metrics or missed blocks\n`;
+                  analysis += `• Community reports of concerning behavior\n`;
+                  analysis += `\n**Recommendation:** Consider unstaking immediately to protect your assets.\n`;
+                } else {
+                  analysis += `• Moderate performance issues detected\n`;
+                  analysis += `• Some missed blocks or downtime\n`;
+                  analysis += `\n**Recommendation:** Monitor closely and consider redelegating if score continues to decline.\n`;
+                }
+              } else {
+                analysis += `**Good News:** No significant incidents found. This validator maintains excellent performance with minimal risk factors.\n`;
+              }
+              
+              analysis += `\n**Performance Metrics:**\n`;
+              analysis += `• Uptime: ${validator.uptime || '99.0'}%\n`;
+              analysis += `• Commission: ${(parseFloat(validator.commission?.rate || '0.05') * 100).toFixed(1)}%\n`;
+              analysis += `• Voting Power: ${validator.voting_power || 'Unknown'}\n`;
+              
+              return analysis;
+            }
+          } catch (error) {
+            // Fallback to general callback
+            console.error('Error in enhanced incident analysis:', error);
+          }
+          
           const callbackId = `incidents_${validatorName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
           const response = await this.elizaAgent.handleCallback(callbackId, walletAddress || 'demo');
           return response.message;

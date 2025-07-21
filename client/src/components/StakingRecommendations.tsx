@@ -10,11 +10,11 @@ import {
   RefreshCw, 
   AlertTriangle, 
   Shield, 
-  Eye, 
   Bot,
   Loader2,
   X,
-  MessageCircle
+  MessageCircle,
+  Zap
 } from "lucide-react";
 
 interface Delegation {
@@ -166,6 +166,41 @@ export function StakingRecommendations() {
     setAiResponse(null);
   };
 
+  const handleAskAIAboutIncidents = async (validatorName: string, score: number) => {
+    if (!address) {
+      setError('Please connect your wallet to use AI incident analysis');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const response = await fetch('/api/eliza/incidents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          validatorName,
+          score,
+          userAddress: address
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get AI incident analysis: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setAiResponse(data);
+      setShowAiChat(true);
+    } catch (err) {
+      console.error('Error getting AI incident analysis:', err);
+      setError(`Failed to get AI analysis for ${validatorName}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isConnected) {
     return (
       <Card className="bg-dark-card border-gray-700">
@@ -211,7 +246,7 @@ export function StakingRecommendations() {
               variant="outline"
               onClick={fetchRecommendations}
               disabled={loading}
-              className="text-white border-gray-600"
+              className="bg-white text-black border-gray-300 hover:bg-gray-100"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 mr-1 animate-spin" />
@@ -270,38 +305,38 @@ export function StakingRecommendations() {
                         {delegation.recommendation}
                       </div>
                       
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => delegation.callbacks && handleCallback(delegation.callbacks.unstake, 'unstake', delegation.validator_name)}
-                          className="flex-1 text-validator-red border-validator-red hover:bg-validator-red hover:text-white"
-                          disabled={loading}
-                        >
-                          <TrendingDown className="w-3 h-3 mr-1" />
-                          Unstake
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => delegation.callbacks && handleCallback(delegation.callbacks.redelegate, 'redelegate', delegation.validator_name)}
-                          className="flex-1 text-validator-yellow border-validator-yellow hover:bg-validator-yellow hover:text-white"
-                          disabled={loading}
-                        >
-                          <RefreshCw className="w-3 h-3 mr-1" />
-                          Redelegate
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => delegation.callbacks && handleCallback(delegation.callbacks.incidents, 'incidents', delegation.validator_name)}
-                          className="flex-1 text-white border-gray-600 hover:bg-gray-600"
-                          disabled={loading}
-                        >
-                          <Eye className="w-3 h-3 mr-1" />
-                          See Incidents
-                        </Button>
-                      </div>
+                      {/* Only show action buttons for non-green validators */}
+                      {delegation.risk_level !== 'green' && (
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            onClick={() => delegation.callbacks && handleCallback(delegation.callbacks.unstake, 'unstake', delegation.validator_name)}
+                            className="flex-1 bg-red-600 text-white hover:bg-red-700 border-0"
+                            disabled={loading}
+                          >
+                            <TrendingDown className="w-3 h-3 mr-1" />
+                            Unstake
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => delegation.callbacks && handleCallback(delegation.callbacks.redelegate, 'redelegate', delegation.validator_name)}
+                            className="flex-1 bg-yellow-500 text-black hover:bg-yellow-600 border-0"
+                            disabled={loading}
+                          >
+                            <RefreshCw className="w-3 h-3 mr-1" />
+                            Redelegate
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleAskAIAboutIncidents(delegation.validator_name, delegation.mars_score)}
+                            className="flex-1 bg-purple-accent text-white hover:bg-purple-accent/90 border-0"
+                            disabled={loading}
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Ask AI
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

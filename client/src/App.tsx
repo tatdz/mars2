@@ -4,7 +4,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Header } from "@/components/Header";
-import { ChatSidebar } from "@/components/ChatSidebar";
 import Home from "@/pages/home";
 import { DocsPage } from "@/pages/docs";
 import { MessagingPage } from "@/pages/messaging";
@@ -22,7 +21,6 @@ function Router() {
         <Route path="/docs" component={DocsPage} />
         <Route component={NotFound} />
       </Switch>
-      <ChatSidebar />
     </div>
   );
 }
