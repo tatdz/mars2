@@ -285,92 +285,83 @@ export function ReportPage() {
         </div>
 
         <div className="space-y-6">
-          <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-500/30 backdrop-blur-sm">
+          <Card className="bg-dark-card border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white text-sm flex items-center">
-                <Info className="w-4 h-4 mr-2 text-purple-accent" />
-                How It Works
-              </CardTitle>
+              <CardTitle className="text-white text-sm">How It Works</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">1</div>
+                <div className="w-6 h-6 bg-purple-accent rounded-full flex items-center justify-center text-white text-xs font-bold">1</div>
                 <div>
                   <p className="text-sm text-white font-medium">Anonymous Submission</p>
-                  <p className="text-xs text-gray-300">Report incidents without revealing your identity</p>
+                  <p className="text-xs text-gray-400">Report incidents without revealing your identity</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">2</div>
+                <div className="w-6 h-6 bg-purple-accent rounded-full flex items-center justify-center text-white text-xs font-bold">2</div>
                 <div>
                   <p className="text-sm text-white font-medium">ZK Verification</p>
-                  <p className="text-xs text-gray-300">Zero-knowledge proofs verify legitimacy</p>
+                  <p className="text-xs text-gray-400">Zero-knowledge proofs verify legitimacy</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">3</div>
+                <div className="w-6 h-6 bg-purple-accent rounded-full flex items-center justify-center text-white text-xs font-bold">3</div>
                 <div>
                   <p className="text-sm text-white font-medium">Score Update</p>
-                  <p className="text-xs text-gray-300">Validator risk scores automatically adjust</p>
+                  <p className="text-xs text-gray-400">Validator risk scores automatically adjust</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-900/20 to-cyan-900/20 border-blue-500/30 backdrop-blur-sm">
+          <Card className="bg-dark-card border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white text-sm flex items-center">
-                <User className="w-4 h-4 mr-2 text-blue-accent" />
-                Recent Reports
-              </CardTitle>
+              <CardTitle className="text-white text-sm">Recent Reports</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-300">Total Reports</span>
-                  <span className="text-white font-semibold">156</span>
+                  <span className="text-gray-400">Total Reports</span>
+                  <span className="text-white">156</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-300">Anonymous</span>
-                  <span className="text-green-400 font-semibold">100%</span>
+                  <span className="text-gray-400">Anonymous</span>
+                  <span className="text-green-400">100%</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-300">Verified</span>
-                  <span className="text-purple-accent font-semibold">142</span>
+                  <span className="text-gray-400">Verified</span>
+                  <span className="text-purple-accent">142</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-300">Processing</span>
-                  <span className="text-yellow-400 font-semibold">14</span>
+                  <span className="text-gray-400">Processing</span>
+                  <span className="text-yellow-400">14</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-cyan-900/20 to-teal-900/20 border-cyan-500/30 backdrop-blur-sm">
+          <Card className="bg-dark-card border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white text-sm flex items-center">
-                <Shield className="w-4 h-4 mr-2 text-cyan-accent" />
-                Anonymous ZK Proofs
-              </CardTitle>
+              <CardTitle className="text-white text-sm">Anonymous ZK Proofs</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white px-3 py-2 shadow-lg">
-                  🔒 Zero Knowledge
+                <Badge variant="outline" className="text-purple-accent border-purple-accent bg-purple-accent/10 px-3 py-1">
+                  <span className="text-white">Zero Knowledge</span>
                 </Badge>
-                <span className="text-xs text-gray-300">Anonymous reporting</span>
+                <span className="text-xs text-gray-400">Anonymous reporting</span>
               </div>
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400 text-white px-3 py-2 shadow-lg">
-                  🛡️ Sybil Resistant
+                <Badge variant="outline" className="text-green-400 border-green-400 bg-green-400/10 px-3 py-1">
+                  <span className="text-white">Sybil Resistant</span>
                 </Badge>
-                <span className="text-xs text-gray-300">Prevents double reports</span>
+                <span className="text-xs text-gray-400">Prevents double reports</span>
               </div>
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-400 text-white px-3 py-2 shadow-lg">
-                  ✅ Verifiable
+                <Badge variant="outline" className="text-blue-400 border-blue-400 bg-blue-400/10 px-3 py-1">
+                  <span className="text-white">Verifiable</span>
                 </Badge>
-                <span className="text-xs text-gray-300">Cryptographically proven</span>
+                <span className="text-xs text-gray-400">Cryptographically proven</span>
               </div>
             </CardContent>
           </Card>
