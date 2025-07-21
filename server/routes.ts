@@ -5,6 +5,7 @@ import { ElizaStakingAgent } from "./eliza";
 import { ChatAgent } from "./chat-agent";
 import { IncidentAI } from "./incident-ai";
 import { SeiIncidentAI } from "./sei-incident-ai";
+import { OllamaConversationAI } from "./ollama-conversation-ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add CORS headers for API routes
@@ -14,6 +15,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
   });
+
+  // Initialize AI services
+  const ollamaAI = new OllamaConversationAI();
+  const elizaAgent = new ElizaStakingAgent();
+  const chatAgent = new ChatAgent();
+  const incidentAI = new IncidentAI();
   
   // Proxy endpoint for Sei validators API to avoid CORS issues
   app.get('/api/sei/validators', async (req, res) => {
@@ -105,14 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Initialize Eliza AI agent
-  const elizaAgent = new ElizaStakingAgent();
-  
-  // Initialize Chat Agent
-  const chatAgent = new ChatAgent();
-  
-  // Initialize Incident AI
-  const incidentAI = new IncidentAI();
+
 
   // Eliza AI recommendations endpoint
   app.post('/api/eliza/recommendations', async (req, res) => {
@@ -250,9 +250,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New conversational AI endpoints for validator education
+  app.post('/api/conversation/start', async (req, res) => {
+    try {
+      const { validatorAddress, validatorName } = req.body;
+      
+      if (!validatorAddress || !validatorName) {
+        return res.status(400).json({
+          error: 'validatorAddress and validatorName are required'
+        });
+      }
+
+      // Get validator context from Sei API
+      const seiIncidentAI = new SeiIncidentAI();
+      const validatorAnalysis = await seiIncidentAI.analyzeValidator(validatorAddress);
+      
+      const sessionId = await ollamaAI.createConversation(
+        validatorAddress, 
+        validatorName, 
+        validatorAnalysis
+      );
+      
+      res.json({
+        sessionId,
+        validatorName,
+        validatorAddress,
+        context: {
+          score: validatorAnalysis.currentScore,
+          riskLevel: validatorAnalysis.riskLevel,
+          status: validatorAnalysis.status
+        }
+      });
+    } catch (error: any) {
+      console.error('Error starting conversation:', error);
+      res.status(500).json({ 
+        error: 'Failed to start conversation',
+        message: error.message 
+      });
+    }
+  });
+
+  app.post('/api/conversation/message', async (req, res) => {
+    try {
+      const { sessionId, message } = req.body;
+      
+      if (!sessionId || !message) {
+        return res.status(400).json({
+          error: 'sessionId and message are required'
+        });
+      }
+
+      const response = await ollamaAI.sendMessage(sessionId, message);
+      
+      res.json({
+        sessionId,
+        message: response.content,
+        timestamp: response.timestamp,
+        role: response.role
+      });
+    } catch (error: any) {
+      console.error('Error processing conversation message:', error);
+      res.status(500).json({ 
+        error: 'Failed to process message',
+        message: error.message 
+      });
+    }
+  });
+
+  app.get('/api/conversation/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const session = ollamaAI.getSession(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+      
+      res.json({
+        sessionId: session.sessionId,
+        validatorName: session.validatorName,
+        validatorAddress: session.validatorAddress,
+        messages: session.messages.filter(msg => msg.role !== 'system'),
+        lastActivity: session.lastActivity
+      });
+    } catch (error: any) {
+      console.error('Error getting conversation:', error);
+      res.status(500).json({ 
+        error: 'Failed to get conversation',
+        message: error.message 
+      });
+    }
+  });
+
   // Cleanup old chat sessions periodically
   setInterval(() => {
     chatAgent.cleanupSessions();
+    ollamaAI.cleanupSessions();
   }, 60 * 60 * 1000); // Every hour
 
   const httpServer = createServer(app);

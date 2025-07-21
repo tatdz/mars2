@@ -16,6 +16,7 @@ import {
   MessageCircle,
   Zap
 } from "lucide-react";
+import { ConversationModal } from './ConversationModal';
 
 interface Delegation {
   validator_address: string;
@@ -44,6 +45,8 @@ export function StakingRecommendations() {
   const [error, setError] = useState<string | null>(null);
   const [aiResponse, setAiResponse] = useState<{ message: string; type: string } | null>(null);
   const [showAiChat, setShowAiChat] = useState(false);
+  const [showConversation, setShowConversation] = useState(false);
+  const [conversationValidator, setConversationValidator] = useState<{ name: string; address: string; context?: any }>({ name: '', address: '' });
 
   const fetchRecommendations = async () => {
     if (!address) return;
@@ -164,6 +167,19 @@ export function StakingRecommendations() {
   const closeAiChat = () => {
     setShowAiChat(false);
     setAiResponse(null);
+  };
+
+  const startConversation = (validatorName: string, validatorAddress: string, delegation: Delegation) => {
+    setConversationValidator({
+      name: validatorName,
+      address: validatorAddress,
+      context: {
+        score: delegation.mars_score,
+        riskLevel: delegation.risk_level,
+        status: 'Active' // You could fetch this from validator data
+      }
+    });
+    setShowConversation(true);
   };
 
   const handleAskAIAboutIncidents = async (validatorName: string, score: number) => {
@@ -317,7 +333,7 @@ export function StakingRecommendations() {
                       
                       {/* Only show action buttons for non-green validators */}
                       {delegation.risk_level !== 'green' && (
-                        <div className="flex space-x-2">
+                        <div className="grid grid-cols-2 gap-2 mb-3">
                           <Button
                             size="sm"
                             onClick={() => delegation.callbacks && handleCallback(delegation.callbacks.unstake, 'unstake', delegation.validator_name)}
@@ -339,14 +355,36 @@ export function StakingRecommendations() {
                           <Button
                             size="sm"
                             onClick={() => handleAskAIAboutIncidents(delegation.validator_name, delegation.mars_score)}
-                            className="flex-1 bg-purple-accent text-white hover:bg-purple-accent/90 border-0"
+                            className="bg-purple-accent text-white hover:bg-purple-accent/90 border-0"
                             disabled={loading}
                           >
                             <Zap className="w-3 h-3 mr-1" />
                             Ask AI
                           </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => startConversation(delegation.validator_name, delegation.validator_address, delegation)}
+                            className="bg-blue-600 text-white hover:bg-blue-700 border-0"
+                            disabled={loading}
+                          >
+                            <MessageCircle className="w-3 h-3 mr-1" />
+                            Chat
+                          </Button>
                         </div>
                       )}
+                      
+                      {/* Education chat button for all validators */}
+                      <div className="mt-2">
+                        <Button
+                          size="sm"
+                          onClick={() => startConversation(delegation.validator_name, delegation.validator_address, delegation)}
+                          className="w-full bg-blue-600 text-white hover:bg-blue-700 border-0"
+                          disabled={loading}
+                        >
+                          <MessageCircle className="w-3 h-3 mr-1" />
+                          Learn About Staking & This Validator
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -436,6 +474,15 @@ export function StakingRecommendations() {
           </div>
         </div>
       )}
+
+      {/* Conversation Modal */}
+      <ConversationModal
+        isOpen={showConversation}
+        onClose={() => setShowConversation(false)}
+        validatorName={conversationValidator.name}
+        validatorAddress={conversationValidator.address}
+        initialContext={conversationValidator.context}
+      />
     </div>
   );
 }
