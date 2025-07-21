@@ -157,33 +157,37 @@ export function MessagingPage() {
         </AlertDescription>
       </Alert>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Key Management */}
-        <div className="lg:col-span-1">
-          <Tabs defaultValue="generate" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2 bg-dark-card">
-              <TabsTrigger value="generate" className="data-[state=active]:bg-purple-accent text-white">
-                Generate
-              </TabsTrigger>
-              <TabsTrigger value="import" className="data-[state=active]:bg-purple-accent text-white">
-                Import
-              </TabsTrigger>
-            </TabsList>
+      {/* Main Tabs */}
+      <Tabs defaultValue="key-management" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 bg-dark-card">
+          <TabsTrigger value="key-management" className="data-[state=active]:bg-purple-accent text-white">
+            🔑 Key Management
+          </TabsTrigger>
+          <TabsTrigger value="send-messages" className="data-[state=active]:bg-purple-accent text-white">
+            📤 Send Messages
+          </TabsTrigger>
+          <TabsTrigger value="message-feed" className="data-[state=active]:bg-purple-accent text-white">
+            🔒 Message Feed
+          </TabsTrigger>
+        </TabsList>
 
-            <TabsContent value="generate" className="space-y-4">
-              <Card className="bg-dark-card border-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center space-x-2">
-                    <Key className="w-5 h-5" />
-                    <span>Generate Key</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+        {/* Key Management Tab */}
+        <TabsContent value="key-management" className="space-y-6">
+          <Card className="bg-dark-card border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white">Cryptographic Key Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Generate Keys Section */}
+                <div className="space-y-4">
+                  <h3 className="text-white font-medium">Generate New Keys</h3>
                   <Button 
                     onClick={generateKey}
-                    className="w-full bg-purple-accent hover:bg-purple-accent/90"
+                    className="w-full bg-purple-accent hover:bg-purple-accent/90 h-12"
                   >
-                    Generate New Key
+                    <Key className="w-4 h-4 mr-2" />
+                    Generate Secure Keys
                   </Button>
                   
                   {encryptionKey && (
@@ -217,70 +221,40 @@ export function MessagingPage() {
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+                  
+                  <div className="mt-6 p-3 bg-dark-bg rounded border border-gray-600">
+                    <div className="text-sm text-gray-400 mb-1">Group Key ID</div>
+                    <div className="text-sm font-mono text-white">validator-group-2025</div>
+                  </div>
+                </div>
 
-            <TabsContent value="import" className="space-y-4">
-              <Card className="bg-dark-card border-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center space-x-2">
-                    <Upload className="w-5 h-5" />
-                    <span>Import Key</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                {/* Import Keys Section */}
+                <div className="space-y-4">
+                  <h3 className="text-white font-medium">Import Existing Keys</h3>
+                  <Textarea
+                    value={encryptionKey}
+                    onChange={(e) => setEncryptionKey(e.target.value)}
+                    placeholder="Paste your exported keys JSON here..."
+                    rows={6}
+                    className="bg-dark-bg border-gray-600 text-white font-mono text-xs resize-none"
+                  />
                   <Button 
                     onClick={handleImportKey}
                     variant="outline"
                     className="w-full"
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    Import Key File
+                    Import Keys
                   </Button>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm text-gray-400">Or paste key manually:</label>
-                    <Input
-                      value={encryptionKey}
-                      onChange={(e) => setEncryptionKey(e.target.value)}
-                      placeholder="Paste encryption key here..."
-                      className="bg-dark-bg border-gray-600 text-white font-mono text-xs"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-
-          {/* Network Stats */}
-          <Card className="bg-dark-card border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-white text-sm flex items-center space-x-2">
-                <Users className="w-4 h-4" />
-                <span>Group Status</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Active Validators</span>
-                <span className="text-green-400">47</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Messages Today</span>
-                <span className="text-white">23</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Encrypted</span>
-                <span className="text-purple-accent">100%</span>
+                </div>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </TabsContent>
 
-        {/* Messaging Interface */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Post Message */}
+        {/* Send Messages Tab */}
+        <TabsContent value="send-messages" className="space-y-6">
+
           <Card className="bg-dark-card border-gray-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center space-x-2">
@@ -293,12 +267,12 @@ export function MessagingPage() {
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 placeholder="Type your message to the validator group..."
-                rows={3}
+                rows={4}
                 className="bg-dark-bg border-gray-600 text-white resize-none"
               />
               
               <div className="flex justify-between items-center">
-                <Badge variant="outline" className="text-purple-accent border-purple-accent">
+                <Badge variant="outline" className="text-purple-accent border-purple-accent bg-purple-accent/10 px-3 py-1">
                   <span className="text-white">{encryptionKey ? "🔒 Encrypted" : "⚠️ No Key"}</span>
                 </Badge>
                 
@@ -320,10 +294,31 @@ export function MessagingPage() {
                   </Button>
                 </div>
               </div>
+              
+              {/* Group Status */}
+              <div className="mt-6 p-4 bg-dark-bg rounded border border-gray-600">
+                <h4 className="text-white text-sm font-medium mb-3">Group Status</h4>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-green-400 text-lg font-bold">47</div>
+                    <div className="text-xs text-gray-400">Active Validators</div>
+                  </div>
+                  <div>
+                    <div className="text-white text-lg font-bold">23</div>
+                    <div className="text-xs text-gray-400">Messages Today</div>
+                  </div>
+                  <div>
+                    <div className="text-purple-accent text-lg font-bold">100%</div>
+                    <div className="text-xs text-gray-400">Encrypted</div>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
+        </TabsContent>
 
-          {/* Message Feed */}
+        {/* Message Feed Tab */}
+        <TabsContent value="message-feed" className="space-y-6">
           <Card className="bg-dark-card border-gray-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center justify-between">
@@ -369,8 +364,8 @@ export function MessagingPage() {
               </ScrollArea>
             </CardContent>
           </Card>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
