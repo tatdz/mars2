@@ -122,17 +122,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes: Latest modifications with dates
 
-### 2025-07-21: Conversational Chat Sidebar with Full Eliza Integration
-- **Complete Chat System**: Built dedicated chat sidebar with session management and natural language processing
-- **Conversational AI Interface**: Users can now have full conversations with Mars² AI assistant using natural language
-- **Context-Aware Responses**: AI remembers conversation history and provides contextual responses based on user questions
-- **Advanced NLP Processing**: Handles complex queries like "Should I unstake from RHINO?" or "Who are the safest validators?"
-- **Session Management**: Persistent chat sessions with automatic cleanup and wallet-aware personalization  
-- **Interactive Chat UI**: Modern chat interface with message history, typing indicators, and responsive design
-- **Multi-Turn Conversations**: AI maintains context across multiple messages for deeper engagement
-- **Smart Query Parsing**: Recognizes validator names, staking actions, and risk assessment requests in natural language
-- **Personalized Advice**: When wallet is connected, provides specific recommendations based on user's actual delegations
-- **API Endpoints**: Added /api/chat/session and /api/chat/message for comprehensive chat functionality
+### 2025-07-21: Advanced Incident AI with Onchain Data Analysis
+- **Onchain Incident Analysis**: Implemented comprehensive AI system that fetches real validator incident data from Mars² smart contracts
+- **Enhanced Ask AI Button**: Replaced "See Incidents" with intelligent "Ask AI about incidents" button with purple Mars² branding
+- **Real-time Contract Integration**: Direct integration with MarsValidatorScore contract (0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294) for authentic incident data
+- **Intelligent Risk Assessment**: AI analyzes actual onchain events, performance metrics, and generates detailed risk reports
+- **Contextual Recommendations**: Provides specific unstake/redelegate advice based on Mars² scoring system and incident severity
+- **Professional AI Modal**: Enhanced incident analysis modal with technical data, performance metrics, and formatted analysis
+- **Event Categorization**: Automatically categorizes incidents into performance, governance, slashing, and community report types
+- **Fallback Demo Data**: Generates realistic incident scenarios for testing when onchain data is unavailable
+- **Color-Coded UI**: Consistent button styling with red unstake, yellow redelegate, and purple AI incident buttons
+- **Hidden for Safe Validators**: Action buttons automatically hidden for validators with green scores (80+)
 
 ### 2025-07-21: Eliza AI Agent Integration
 - **AI-Powered Staking Recommendations**: Integrated @elizaos/plugin-sei for personalized staking advice

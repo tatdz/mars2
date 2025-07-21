@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { ElizaStakingAgent } from "./eliza";
 import { ChatAgent } from "./chat-agent";
+import { IncidentAI } from "./incident-ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add CORS headers for API routes
@@ -108,6 +109,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Initialize Chat Agent
   const chatAgent = new ChatAgent();
+  
+  // Initialize Incident AI
+  const incidentAI = new IncidentAI();
 
   // Eliza AI recommendations endpoint
   app.post('/api/eliza/recommendations', async (req, res) => {
@@ -207,27 +211,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI incidents analysis endpoint
+  // Enhanced AI incidents analysis endpoint with onchain data
   app.post('/api/eliza/incidents', async (req, res) => {
     try {
-      const { validatorName, score, userAddress } = req.body;
+      const { validatorName, validatorAddress, userQuestion = "What incidents have affected this validator?" } = req.body;
       
-      if (!validatorName || !userAddress) {
+      if (!validatorName) {
         return res.status(400).json({
           error: 'Invalid request',
-          message: 'validatorName and userAddress are required'
+          message: 'validatorName is required'
         });
       }
 
-      console.log(`Generating AI incident analysis for ${validatorName} (score: ${score})`);
+      console.log(`Generating AI incident analysis for ${validatorName}`);
       
-      // Generate detailed incident analysis using ChatAgent
-      const analysisMessage = `Analyze the incidents and risk factors for validator ${validatorName} which has a Mars² score of ${score}. Provide a detailed report of what happened, why the score is low, and specific recommendations.`;
+      // Fetch comprehensive incident data from onchain sources
+      const incidentData = await incidentAI.fetchValidatorIncidentData(
+        validatorAddress || 'demo_address', 
+        validatorName
+      );
       
-      const sessionId = `incidents_${Date.now()}`;
-      const response = await chatAgent.processMessage(sessionId, analysisMessage, userAddress);
+      // Generate intelligent analysis using the incident AI
+      const analysis = await incidentAI.generateIncidentAnalysis(incidentData, userQuestion);
       
-      res.json(response);
+      res.json({
+        id: `incident_${Date.now()}`,
+        role: 'assistant',
+        content: analysis,
+        timestamp: Date.now(),
+        validatorData: incidentData
+      });
     } catch (error: any) {
       console.error('Error generating AI incident analysis:', error);
       res.status(500).json({

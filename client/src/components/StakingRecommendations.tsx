@@ -167,13 +167,10 @@ export function StakingRecommendations() {
   };
 
   const handleAskAIAboutIncidents = async (validatorName: string, score: number) => {
-    if (!address) {
-      setError('Please connect your wallet to use AI incident analysis');
-      return;
-    }
-    
     try {
       setLoading(true);
+      setError(null);
+      
       const response = await fetch('/api/eliza/incidents', {
         method: 'POST',
         headers: {
@@ -181,8 +178,8 @@ export function StakingRecommendations() {
         },
         body: JSON.stringify({
           validatorName,
-          score,
-          userAddress: address
+          validatorAddress: `sei_validator_${validatorName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+          userQuestion: `What incidents have affected ${validatorName} and should I be concerned about my stake?`
         }),
       });
 
@@ -195,7 +192,7 @@ export function StakingRecommendations() {
       setShowAiChat(true);
     } catch (err) {
       console.error('Error getting AI incident analysis:', err);
-      setError(`Failed to get AI analysis for ${validatorName}`);
+      setError(`Failed to get AI analysis for ${validatorName}. Please try again.`);
     } finally {
       setLoading(false);
     }
@@ -346,14 +343,17 @@ export function StakingRecommendations() {
         </CardContent>
       </Card>
 
-      {/* AI Chat Modal */}
+      {/* Enhanced AI Incident Analysis Modal */}
       {showAiChat && aiResponse && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-dark-card border border-gray-700 rounded-lg max-w-2xl w-full mx-4 max-h-96 overflow-hidden">
+          <div className="bg-dark-card border border-gray-700 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <div className="flex items-center space-x-2">
-                <MessageCircle className="w-5 h-5 text-purple-accent" />
-                <span className="text-white font-medium">Mars² AI Assistant</span>
+                <Zap className="w-5 h-5 text-purple-accent" />
+                <span className="text-white font-medium">Mars² Incident AI</span>
+                <Badge variant="outline" className="text-purple-accent border-purple-accent">
+                  Onchain Analysis
+                </Badge>
               </div>
               <Button
                 size="sm"
@@ -365,21 +365,91 @@ export function StakingRecommendations() {
               </Button>
             </div>
             
-            <div className="p-4 max-h-80 overflow-y-auto">
-              <div className="bg-dark-bg rounded-lg p-4 border border-gray-600">
-                <div className="whitespace-pre-line text-white text-sm leading-relaxed">
-                  {aiResponse.message}
+            <div className="p-6 max-h-[70vh] overflow-y-auto">
+              <div className="bg-dark-bg rounded-lg p-6 border border-gray-600">
+                <div className="prose prose-invert max-w-none">
+                  {aiResponse.content.split('\n').map((line: string, i: number) => {
+                    if (line.startsWith('**') && line.endsWith('**')) {
+                      return (
+                        <h3 key={i} className="text-white font-semibold text-lg mb-2 mt-4">
+                          {line.replace(/\*\*/g, '')}
+                        </h3>
+                      );
+                    }
+                    if (line.startsWith('• ')) {
+                      return (
+                        <div key={i} className="ml-4 mb-1 text-gray-200">
+                          <span className="text-purple-accent mr-2">•</span>
+                          {line.slice(2)}
+                        </div>
+                      );
+                    }
+                    if (line.match(/^\d+\./)) {
+                      return (
+                        <div key={i} className="ml-4 mb-2 text-gray-200">
+                          <span className="text-purple-accent font-medium">{line}</span>
+                        </div>
+                      );
+                    }
+                    if (line.includes('📊') || line.includes('⚠️') || line.includes('🚨') || line.includes('✅')) {
+                      return (
+                        <div key={i} className="text-white font-medium text-base mb-2 p-2 bg-dark-card rounded border-l-4 border-purple-accent">
+                          {line}
+                        </div>
+                      );
+                    }
+                    return line ? (
+                      <p key={i} className="text-gray-200 mb-2 leading-relaxed">
+                        {line}
+                      </p>
+                    ) : (
+                      <div key={i} className="mb-2">&nbsp;</div>
+                    );
+                  })}
                 </div>
               </div>
+              
+              {aiResponse.validatorData && (
+                <div className="mt-4 p-4 bg-dark-bg rounded-lg border border-gray-600">
+                  <h4 className="text-white font-medium mb-2">Technical Data</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-400">Current Score:</span>
+                      <span className="text-white ml-2">{aiResponse.validatorData.currentScore}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Risk Level:</span>
+                      <span className={`ml-2 ${
+                        aiResponse.validatorData.riskLevel === 'green' ? 'text-validator-green' :
+                        aiResponse.validatorData.riskLevel === 'yellow' ? 'text-validator-yellow' :
+                        'text-validator-red'
+                      }`}>
+                        {aiResponse.validatorData.riskLevel.toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Total Incidents:</span>
+                      <span className="text-white ml-2">{aiResponse.validatorData.events.length}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Uptime:</span>
+                      <span className="text-white ml-2">{aiResponse.validatorData.performanceMetrics.uptime.toFixed(1)}%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="p-4 border-t border-gray-700 text-right">
+            <div className="p-4 border-t border-gray-700 flex justify-between items-center">
+              <div className="text-xs text-gray-400">
+                Analysis based on onchain Mars² events and performance data
+              </div>
               <Button
                 size="sm"
                 onClick={closeAiChat}
                 className="bg-purple-accent hover:bg-purple-accent/90"
               >
-                Got it
+                Close Analysis
               </Button>
             </div>
           </div>

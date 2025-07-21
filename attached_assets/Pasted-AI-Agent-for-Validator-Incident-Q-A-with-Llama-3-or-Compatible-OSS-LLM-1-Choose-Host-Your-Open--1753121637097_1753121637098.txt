@@ -1,0 +1,149 @@
+AI Agent for Validator Incident Q&A (with Llama 3 or Compatible OSS LLM)
+1. Choose & Host Your Open Source Model
+For local dev, use Ollama and pull Llama 3:
+
+text
+ollama pull llama3
+Start Ollama server (by default runs at http://localhost:11434).
+
+Or, use a third-party API compatible with OpenAI format (Together.ai, Groq, etc).
+
+2. Prepare Inputs for Incident Questions
+When the user clicks "Ask AI about incidents", trigger a handler that:
+
+Knows which validator the user is asking about (keep validatorAddress or display name in state/context)
+
+Fetches incident data for that validator:
+
+Onchain events from Mars²'s contract (ex: getEvents(address) on MarsValidatorScore.sol on Sei EVM testnet)
+
+Optionally, static info (validator profile, current score)...
+
+Example (JS/ethers):
+
+js
+import { ethers } from "ethers";
+const provider = new ethers.JsonRpcProvider("https://evm-rpc.testnet.sei.io");
+const contract = new ethers.Contract(
+  "0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294",
+  [ "function getEvents(address) view returns (tuple(string label,int256 delta,uint timestamp)[])" ],
+  provider
+);
+
+async function fetchIncidents(validatorAddress) {
+  const events = await contract.getEvents(validatorAddress);
+  // events: Array of {label, delta, timestamp}
+  return events;
+}
+3. Build the User Flow (Frontend UI)
+Display a button on validator cards/details:
+[Ask AI about incidents]
+
+When clicked:
+
+Shows a sidebar/chat/modal
+
+Calls fetchIncidents(validatorAddress) (see above)
+
+Presents a “Loading AI…” spinner, then displays the AI answer
+
+4. Compose an AI Prompt (System + Data) and Call Your LLM API
+Create a well-structured prompt:
+
+System instruction: The AI should answer as a Sei/Mars² staking assistant, using onchain event data.
+
+Data context: All incident/event data just fetched.
+
+User prompt: Original text, e.g. “What happened to this validator?”
+
+Example prompt:
+
+js
+const aiPrompt = [
+  { role: "system", content: `
+    You are Mars², an expert on Sei validator risk and onchain incidents. 
+    The user provided this validator's event history and asks a question. Summarize the risk in plain English, flag critical incidents, and explain how Mars² scores relate to the current status.
+  `},
+  { role: "user", content: `
+    INCIDENTS DATA:
+    ${JSON.stringify(events)}
+    USER QUESTION: What incidents have affected this validator? Should I unstake?
+  `}
+];
+Send prompt to your locally running Llama 3 (Ollama) instance:
+
+js
+const response = await fetch('http://localhost:11434/v1/chat/completions', {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: "llama3",
+    messages: aiPrompt,
+  }),
+});
+const data = await response.json();
+const aiAnswer = data.choices[0].message.content;
+For remote APIs:
+Use the appropriate endpoint and adjust authentication.
+
+5. Display the AI Answer in the UI
+The AI’s response is shown in your sidebar/chat/modal, providing a natural-language explanation, flagged risks, advice to unstake/redelegate if score/risk warrants it.
+
+Optionally, show prior Q&A context if user asks new questions (multi-turn).
+
+Simple React snippet:
+
+jsx
+// In validator details component:
+<button onClick={askAiHandler}>Ask AI about incidents</button>
+
+// Chat/modal/popup:
+<div>
+  {isLoadingAI && <Spinner />}
+  {aiAnswer && <div className="ai-chat-output">{aiAnswer}</div>}
+</div>
+6. Make It Multi-Turn and Deeply Conversational (Optional)
+Keep a messages array for the chat (send the entire list as context each time).
+
+Allow user to type follow-up questions (“Why did they get slashed?” etc.).
+
+On each submit, pass the full context to the AI API for continuity.
+
+Example End-to-End Flow
+User clicks [Ask AI about incidents] for Validator RHINO.
+
+Mars² UI fetches onchain events for RHINO, composes context as above.
+
+Sends the prompt to your Llama 3 or OpenAI-compatible endpoint.
+
+The model responds:
+“Validator RHINO has experienced multiple missed-block incidents recently, a -10 score drop from a community report, and was slashed on July 8th. The current Mars² risk score is 39 (🔴 Red). Based on Mars² policy, unstaking is advised.”
+
+The UI shows this to the user, with buttons for follow-up: “What does slashing mean?”, “Show redelegate options”, etc.
+
+References & Setup Links
+Ollama (local open source LLM runners): https://ollama.com/
+
+Llama 3: https://huggingface.co/meta-llama
+
+Open source API endpoints:
+https://www.together.ai/
+https://console.groq.com/
+
+Mars² contract events:
+https://seitrace.com/address/0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294?chain=atlantic-2&tab=transactions
+
+Sei EVM RPC: https://evm-rpc.testnet.sei.io
+
+Summary Checklist for Replit Implementation
+ Host an open source LLM (Llama 3 via Ollama or compatible API)
+
+ In Mars² UI, on “Ask AI” button:
+
+Fetch incident event data from chain
+
+Send prompt to AI with system role & incident context
+
+ Display AI response conversationally to the user
+
+ Allow follow-up questions, keeping chat context alive
