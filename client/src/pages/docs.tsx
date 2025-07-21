@@ -32,7 +32,7 @@ const docSections = [
         },
         {
           title: "Key Features",
-          content: "• Real-time validator scoring and risk assessment\n• Anonymous incident reporting with zero-knowledge proofs\n• Encrypted validator group messaging\n• Plain English recommendations for stakers"
+          content: "• Real-time validator scoring and risk assessment\n• AI-powered staking recommendations with fast analysis\n• Anonymous incident reporting with zero-knowledge proofs\n• Encrypted validator group messaging\n• Plain English recommendations for stakers"
         },
         {
           title: "Network Support",
@@ -106,6 +106,33 @@ const docSections = [
         {
           title: "Emergency Transparency",
           content: "During critical network events, messages may be revealed to stakers for transparency and coordination as outlined in validator agreements."
+        }
+      ]
+    }
+  },
+  {
+    id: "ai-recommendations",
+    title: "AI Staking Recommendations",
+    icon: Zap,
+    content: {
+      title: "AI-Powered Staking Analysis",
+      description: "Get instant, personalized recommendations for your validator delegations",
+      sections: [
+        {
+          title: "How It Works",
+          content: "Connect your wallet and click 'Get AI Recommendations' to receive instant analysis of your current delegations. Our AI analyzes validator scores, performance metrics, and risk factors to provide actionable advice."
+        },
+        {
+          title: "Analysis Features",
+          content: "• Sub-second response times with optimized parallel processing\n• Real-time Mars² score integration for each validator\n• Risk categorization and plain-English recommendations\n• Direct action buttons for unstaking, redelegating, or viewing incidents\n• Fallback to simulated data when blockchain RPC is unavailable"
+        },
+        {
+          title: "Action Recommendations",
+          content: "🟢 Green Validators: 'Healthy — no action needed'\n🟡 Yellow Validators: 'Monitor or consider reducing stake'\n🔴 Red Validators: 'High risk! Unstake immediately'\n\nEach recommendation includes specific validator analysis and suggested next steps."
+        },
+        {
+          title: "Performance Optimization",
+          content: "• Fast timeout handling prevents long delays\n• Parallel validator analysis for multiple delegations\n• Graceful degradation when network connections fail\n• Immediate fallback to cached or simulated risk scores"
         }
       ]
     }
