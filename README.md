@@ -39,7 +39,7 @@ Mars² uses three main contracts deployed on Sei EVM Testnet (Atlantic-2):
 
 ## Getting Started
 
-1.**Clone the repository**
+1. **Clone the repository**
    ```bash
    git clone https://github.com/tatdz/mars2.git
    cd mars2
@@ -53,6 +53,7 @@ Mars² uses three main contracts deployed on Sei EVM Testnet (Atlantic-2):
    ```bash
    npm run dev
    ```
+The application will be available at `http://localhost:5000`
 
 4. **Connect MetaMask**
    - The app will automatically configure Sei testnet in MetaMask
@@ -76,50 +77,6 @@ Mars² uses three main contracts deployed on Sei EVM Testnet (Atlantic-2):
 - **ethers.js v6** for blockchain interactions
 - Real-time validator data from Sei APIs
 - ZK-proof simulation for anonymous reporting
-
-## Hosting the Application
-
-After completing the installation steps above, you can host Mars² in several ways:
-
-### Local Development
-```bash
-npm run dev
-```
-The application will be available at `http://localhost:5000`
-
-### Production Deployment
-
-#### Option 1: Replit Hosting (Recommended)
-1. Fork this repository on Replit
-2. The application will automatically install dependencies
-3. Click "Run" to start the server
-4. Your app will be hosted at `https://your-repl-name.your-username.repl.co`
-
-#### Option 2: Traditional Hosting (Vercel, Netlify, etc.)
-1. Build the application:
-   ```bash
-   npm run build
-   ```
-2. Deploy the `dist` folder to your hosting provider
-3. Ensure your hosting provider supports Node.js for the backend API
-
-#### Option 3: Self-Hosted Server
-1. Build the application:
-   ```bash
-   npm run build
-   ```
-2. Start the production server:
-   ```bash
-   npm start
-   ```
-3. Configure your domain and SSL certificates
-4. Set up a reverse proxy (nginx recommended)
-
-### Environment Variables
-For production deployments, configure these environment variables:
-- `DATABASE_URL`: PostgreSQL connection string (optional, uses memory storage if not set)
-- `NODE_ENV`: Set to `production` for production builds
-- `PORT`: Server port (defaults to 5000)
 
 ## User Flow Guides
 
