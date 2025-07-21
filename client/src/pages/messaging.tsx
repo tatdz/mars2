@@ -326,9 +326,23 @@ export function MessagingPage() {
                   <MessageSquare className="w-5 h-5" />
                   <span>Message Feed</span>
                 </div>
-                <Badge variant="outline" className="text-purple-accent border-purple-accent bg-purple-accent/10 px-3 py-1">
-                  <span className="text-white">{demoMessages.length} messages</span>
-                </Badge>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      alert("Emergency unlock activated! All messages are now visible to stakers during this critical network event.");
+                    }}
+                    className="text-validator-red border-validator-red hover:bg-validator-red hover:text-white"
+                    title="Unlock messages to stakers during emergency events"
+                  >
+                    <Unlock className="w-4 h-4 mr-1" />
+                    Unlock to Stakers
+                  </Button>
+                  <Badge variant="outline" className="text-purple-accent border-purple-accent bg-purple-accent/10 px-3 py-1">
+                    <span className="text-white">{demoMessages.length} messages</span>
+                  </Badge>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>

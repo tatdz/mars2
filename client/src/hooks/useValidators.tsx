@@ -145,6 +145,7 @@ export function useValidatorStats() {
   const stats = {
     total: validators.length,
     active: validators.filter(v => v.status === 'BOND_STATUS_BONDED' && !v.jailed).length,
+    inactive: validators.filter(v => v.status !== 'BOND_STATUS_BONDED' && !v.jailed).length,
     jailed: validators.filter(v => v.jailed).length,
     averageUptime: validators.length > 0 
       ? validators.reduce((sum, v) => sum + (v.uptime || 0), 0) / validators.length 

@@ -330,7 +330,7 @@ export function ReportPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Verified</span>
-                  <span className="text-purple-accent">142</span>
+                  <span className="text-white">142</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Processing</span>

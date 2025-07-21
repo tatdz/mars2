@@ -1,8 +1,8 @@
 export interface Validator {
-  id: string;
-  moniker: string;
+  id?: string;
+  moniker?: string;
   operator_address: string;
-  consensus_pubkey: string;
+  consensus_pubkey: any;
   jailed: boolean;
   status: string;
   tokens: string;
@@ -25,14 +25,14 @@ export interface Validator {
     update_time: string;
   };
   min_self_delegation: string;
-  rank: number;
-  mintscan_image: string;
-  uptime: number;
-  uptime_periods: number[];
-  missed_blocks: number;
-  missed_blocks_periods: number[];
-  slashed: boolean;
-  signing_info: {
+  rank?: number;
+  mintscan_image?: string;
+  uptime?: number;
+  uptime_periods?: number[];
+  missed_blocks?: number;
+  missed_blocks_periods?: number[];
+  slashed?: boolean;
+  signing_info?: {
     address: string;
     start_height: string;
     index_offset: string;
@@ -40,8 +40,14 @@ export interface Validator {
     tombstoned: boolean;
     missed_blocks_counter: string;
   };
-  recent_rewards: any[];
-  votes: any[];
+  recent_rewards?: any[];
+  votes?: any[];
+  // Mars² specific fields
+  mars_score?: number;
+  mars_status?: string;
+  voting_power?: number;
+  recent_reports?: number;
+  last_updated?: string;
 }
 
 export interface ValidatorScore {

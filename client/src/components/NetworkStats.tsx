@@ -13,10 +13,10 @@ export function NetworkStats() {
       color: "text-validator-green",
     },
     {
-      label: "Network Uptime",
-      value: `${stats.averageUptime.toFixed(1)}%`,
+      label: "Inactive Validators", 
+      value: stats.inactive,
       icon: TrendingUp,
-      color: "text-validator-green",
+      color: "text-validator-yellow",
     },
     {
       label: "Jailed Validators",
