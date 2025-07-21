@@ -331,8 +331,8 @@ export function MessagingPage() {
                   <MessageSquare className="w-5 h-5" />
                   <span>Message Feed</span>
                 </div>
-                <Badge variant="outline" className="text-gray-400">
-                  {demoMessages.length} messages
+                <Badge variant="outline" className="text-purple-accent border-purple-accent bg-purple-accent/10 px-3 py-1">
+                  <span className="text-white">{demoMessages.length} messages</span>
                 </Badge>
               </CardTitle>
             </CardHeader>
@@ -349,12 +349,12 @@ export function MessagingPage() {
                           <div className="w-6 h-6 bg-purple-accent rounded-full flex items-center justify-center text-xs font-bold">
                             {message.sender.slice(0, 2).toUpperCase()}
                           </div>
-                          <span className="text-sm text-gray-400">{message.sender}</span>
+                          <span className="text-sm text-white font-medium">{message.sender}</span>
                           {message.encrypted && (
                             <Lock className="w-3 h-3 text-purple-accent" />
                           )}
                         </div>
-                        <div className="flex items-center space-x-2 text-xs text-gray-500">
+                        <div className="flex items-center space-x-2 text-xs text-gray-400">
                           <Clock className="w-3 h-3" />
                           {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
                         </div>
