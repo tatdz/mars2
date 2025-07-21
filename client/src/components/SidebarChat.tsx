@@ -111,7 +111,7 @@ export function SidebarChat({ isOpen, onClose }: SidebarChatProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed right-4 bottom-4 w-96 h-[600px] z-50 animate-in slide-in-from-right duration-300">
+    <div className="fixed right-4 bottom-4 w-96 h-[500px] z-50 animate-in slide-in-from-right duration-300">
       <Card className="bg-dark-card border-gray-700 h-full flex flex-col shadow-2xl">
         <CardHeader className="pb-3">
           <CardTitle className="text-white flex items-center justify-between">
@@ -133,8 +133,8 @@ export function SidebarChat({ isOpen, onClose }: SidebarChatProps) {
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="flex flex-col flex-1 p-4 pt-0">
-          <ScrollArea ref={scrollAreaRef} className="flex-1 mb-4 pr-2">
+        <CardContent className="flex flex-col flex-1 p-4 pt-0 min-h-0">
+          <ScrollArea ref={scrollAreaRef} className="flex-1 mb-4 pr-2 min-h-0">
             <div className="space-y-4">
               {messages.map((message, index) => (
                 <div key={index} className={`flex items-start space-x-2 ${
@@ -189,27 +189,29 @@ export function SidebarChat({ isOpen, onClose }: SidebarChatProps) {
             </div>
           </ScrollArea>
 
-          <div className="flex space-x-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask about validators, staking, Mars² features..."
-              className="flex-1 bg-dark-bg border-gray-600 text-white placeholder-gray-400"
-              disabled={loading}
-            />
-            <Button
-              onClick={sendMessage}
-              disabled={loading || !input.trim()}
-              className="bg-purple-accent hover:bg-purple-accent/90 text-white"
-              size="sm"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
+          <div className="flex-shrink-0 space-y-2">
+            <div className="flex space-x-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about validators, staking, Mars² features..."
+                className="flex-1 bg-dark-bg border-gray-600 text-white placeholder-gray-400"
+                disabled={loading}
+              />
+              <Button
+                onClick={sendMessage}
+                disabled={loading || !input.trim()}
+                className="bg-purple-accent hover:bg-purple-accent/90 text-white"
+                size="sm"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
 
-          <div className="text-xs text-gray-500 mt-2 text-center">
-            Powered by Ollama Llama 3 • Real-time Sei validator data
+            <div className="text-xs text-gray-500 text-center">
+              Powered by Mars² AI • Real-time Sei validator data
+            </div>
           </div>
         </CardContent>
       </Card>
