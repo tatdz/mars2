@@ -120,19 +120,19 @@ const docSections = [
       sections: [
         {
           title: "How It Works",
-          content: "Connect your wallet and click 'Get AI Recommendations' to receive instant analysis of your current delegations. Our AI analyzes validator scores, performance metrics, and risk factors to provide actionable advice."
+          content: "Connect your wallet and click 'Get AI Recommendations' to trigger real GPT-4o analysis of your delegations. The AI examines Mars² scores, validator performance metrics, commission rates, governance participation, and portfolio diversification to generate nuanced, context-aware recommendations with confidence scores and specific action plans."
         },
         {
           title: "Analysis Features",
-          content: "• Sub-second response times with optimized parallel processing\n• Real-time Mars² score integration for each validator\n• Risk categorization and plain-English recommendations\n• Direct action buttons for unstaking, redelegating, or viewing incidents\n• Fallback to simulated data when blockchain RPC is unavailable"
+          content: "• **Real OpenAI GPT-4o Integration**: Genuine machine learning analysis of validator performance\n• **Comprehensive Data Analysis**: Examines uptime, commission rates, governance participation, jailed status\n• **Portfolio-Level Insights**: AI analyzes entire delegation portfolio for strategic recommendations\n• **Confidence Scoring**: Each recommendation includes AI confidence levels (0-100)\n• **Enhanced Fallback**: Sophisticated rule-based analysis when AI quota limits reached\n• **Sub-5 Second Response**: Optimized parallel processing for fast results"
         },
         {
-          title: "Action Recommendations",
-          content: "🟢 Green Validators: 'Healthy — no action needed'\n🟡 Yellow Validators: 'Monitor or consider reducing stake'\n🔴 Red Validators: 'High risk! Unstake immediately'\n\nEach recommendation includes specific validator analysis and suggested next steps."
+          title: "AI-Generated Recommendations",
+          content: "**Advanced Analysis**: AI provides detailed validator assessments with specific concerns and action plans\n**Confidence Scoring**: Each recommendation includes AI confidence levels (85-95+ typical)\n**Key Concerns**: Specific issues identified (e.g., 'Validator jailed', 'High commission rate', 'Poor governance participation')\n**Suggested Actions**: Concrete next steps (e.g., 'Consider unstaking immediately', 'Research alternative validators', 'Monitor performance weekly')\n**Portfolio Insights**: Overall risk assessment and diversification recommendations"
         },
         {
-          title: "Performance Optimization",
-          content: "• Fast timeout handling prevents long delays\n• Parallel validator analysis for multiple delegations\n• Graceful degradation when network connections fail\n• Immediate fallback to cached or simulated risk scores"
+          title: "Technical Implementation",
+          content: "• **Real AI Model**: Uses OpenAI GPT-4o for genuine machine learning analysis\n• **Quota Management**: Graceful fallback to enhanced rule-based system when AI limits reached\n• **Fast Processing**: Parallel validator analysis with 3-second timeouts\n• **Comprehensive Data**: Fetches real validator metrics from Sei blockchain APIs\n• **Error Handling**: Robust fallback mechanisms ensure consistent user experience"
         }
       ]
     }
