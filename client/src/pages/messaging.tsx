@@ -299,7 +299,7 @@ export function MessagingPage() {
               
               <div className="flex justify-between items-center">
                 <Badge variant="outline" className="text-purple-accent border-purple-accent">
-                  {encryptionKey ? "🔒 Encrypted" : "⚠️ No Key"}
+                  <span className="text-white">{encryptionKey ? "🔒 Encrypted" : "⚠️ No Key"}</span>
                 </Badge>
                 
                 <div className="space-x-2">

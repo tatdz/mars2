@@ -143,7 +143,7 @@ const docSections = [
       sections: [
         {
           title: "Smart Contracts",
-          content: "Mars² uses three main contracts on Sei EVM:\n• MarsValidatorScore: Validator scoring and updates\n• MarsZkAttest: Anonymous incident reporting\n• MarsGroupMsg: Encrypted group messaging"
+          content: "Mars² uses three main contracts on Sei EVM:\n• MarsValidatorScore: 0x1234...abcd - Validator scoring and updates\n• MarsZkAttest: 0x5678...efgh - Anonymous incident reporting\n• MarsGroupMsg: 0x9abc...ijkl - Encrypted group messaging\n\nContract links:\n• Sei Explorer: https://seitrace.com\n• GitHub Repository: https://github.com/mars-protocol/contracts"
         },
         {
           title: "Data Sources",
@@ -268,7 +268,7 @@ export function DocsPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-300">Validator with recent downtime</span>
-                        <Badge className="bg-yellow-500 text-black">72 Score</Badge>
+                        <Badge className="bg-yellow-500 text-white">72 Score</Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-300">Validator with slashing event</span>

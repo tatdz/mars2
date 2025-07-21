@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useContracts } from "@/hooks/useContracts";
 import { useWallet } from "@/hooks/useWallet";
+import { useValidators } from "@/hooks/useValidators";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +33,7 @@ import { Shield, AlertTriangle, Info, CheckCircle, Clock, User } from "lucide-re
 const reportSchema = z.object({
   validatorAddress: z.string().min(1, "Validator address is required"),
   incidentType: z.string().min(1, "Please select an incident type"),
-  description: z.string().min(20, "Description must be at least 20 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
   evidence: z.string().optional(),
 });
 
@@ -53,6 +54,7 @@ const incidentTypes = [
 export function ReportPage() {
   const { address, isConnected } = useWallet();
   const { submitReport } = useContracts();
+  const { validators } = useValidators();
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const form = useForm<ReportFormData>({
@@ -137,17 +139,30 @@ export function ReportPage() {
                     name="validatorAddress"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white">Validator Address</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="sei1abc123... or validator operator address"
-                            className="bg-dark-bg border-gray-600 text-white"
-                          />
-                        </FormControl>
-                        <FormDescription className="text-gray-400">
-                          Enter the validator's operator address or wallet address
-                        </FormDescription>
+                        <FormLabel className="text-white">Validator</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-dark-bg border-gray-600 text-white">
+                              <SelectValue placeholder="Select validator to report" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-dark-card border-gray-600 max-h-60">
+                            {validators?.map((validator: any) => (
+                              <SelectItem
+                                key={validator.operator_address}
+                                value={validator.operator_address}
+                                className="text-white hover:bg-gray-700"
+                              >
+                                <div className="flex flex-col">
+                                  <div className="font-medium">{validator.description.moniker}</div>
+                                  <div className="text-xs text-gray-400 font-mono">
+                                    {validator.operator_address.slice(0, 20)}...
+                                  </div>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -202,7 +217,7 @@ export function ReportPage() {
                           />
                         </FormControl>
                         <FormDescription className="text-gray-400">
-                          Provide detailed information about the incident (minimum 20 characters)
+                          Provide detailed information about the incident (minimum 10 characters)
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -331,20 +346,20 @@ export function ReportPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="text-purple-accent border-current">
-                  Zero Knowledge
+                <Badge variant="outline" className="text-purple-accent border-purple-accent bg-purple-accent/10 px-3 py-1">
+                  <span className="text-white">Zero Knowledge</span>
                 </Badge>
                 <span className="text-xs text-gray-400">Anonymous reporting</span>
               </div>
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="text-green-400 border-current">
-                  Sybil Resistant
+                <Badge variant="outline" className="text-green-400 border-green-400 bg-green-400/10 px-3 py-1">
+                  <span className="text-white">Sybil Resistant</span>
                 </Badge>
                 <span className="text-xs text-gray-400">Prevents double reports</span>
               </div>
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="text-blue-400 border-current">
-                  Verifiable
+                <Badge variant="outline" className="text-blue-400 border-blue-400 bg-blue-400/10 px-3 py-1">
+                  <span className="text-white">Verifiable</span>
                 </Badge>
                 <span className="text-xs text-gray-400">Cryptographically proven</span>
               </div>
