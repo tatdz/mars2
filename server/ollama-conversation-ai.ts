@@ -31,50 +31,31 @@ export class OllamaConversationAI {
       // Check if Ollama is available
       await execAsync('ollama --version');
       
-      // Start Ollama service if not running
-      try {
-        await execAsync('curl -s http://localhost:11434/api/tags', { timeout: 2000 });
-        this.ollamaAvailable = true;
-        console.log('Ollama service detected and running');
-      } catch {
-        console.log('Starting Ollama service...');
-        // Start Ollama in background
-        exec('OLLAMA_HOST=0.0.0.0:11434 ollama serve', (error) => {
-          if (error) {
-            console.warn('Ollama service start failed:', error.message);
-          }
-        });
-        
-        // Wait and check again
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        try {
-          await execAsync('curl -s http://localhost:11434/api/tags', { timeout: 2000 });
-          this.ollamaAvailable = true;
-          console.log('Ollama service started successfully');
-        } catch {
-          console.warn('Ollama service failed to start, using fallback responses');
+      // Start Ollama service in background
+      console.log('Starting Ollama service...');
+      exec('OLLAMA_HOST=0.0.0.0:11434 ollama serve > /dev/null 2>&1', (error) => {
+        if (error) {
+          console.warn('Ollama service start failed:', error.message);
         }
-      }
+      });
       
-      // Try to pull llama3 model if Ollama is available
-      if (this.ollamaAvailable) {
+      // Set optimistic availability - we'll check on each request
+      this.ollamaAvailable = true;
+      console.log('Ollama initialization completed, using dynamic availability checking');
+      
+      // Try to pull llama3 model in background
+      setTimeout(async () => {
         try {
-          console.log('Checking for Llama3 model...');
           const { stdout } = await execAsync('ollama list');
           if (!stdout.includes('llama3')) {
-            console.log('Pulling Llama3 model...');
-            exec('ollama pull llama3:8b', (error, stdout, stderr) => {
-              if (error) {
-                console.error('Failed to pull Llama3:', error);
-              } else {
-                console.log('Llama3 model pulled successfully');
-              }
-            });
+            console.log('Pulling Llama3 model in background...');
+            exec('ollama pull llama3:8b > /dev/null 2>&1');
           }
         } catch (error) {
-          console.warn('Could not check/pull Llama3 model:', error);
+          console.warn('Could not check Llama3 model:', error);
         }
-      }
+      }, 5000);
+      
     } catch (error) {
       console.warn('Ollama not available, using fallback AI responses');
       this.ollamaAvailable = false;
@@ -124,14 +105,15 @@ export class OllamaConversationAI {
     // Generate AI response
     let aiResponse: string;
     
-    if (this.ollamaAvailable) {
-      try {
+    // Always try Ollama first if theoretically available, fallback on any error
+    try {
+      if (this.ollamaAvailable) {
         aiResponse = await this.generateOllamaResponse(session.messages);
-      } catch (error) {
-        console.error('Ollama generation failed:', error);
-        aiResponse = await this.generateFallbackResponse(userMessage, session);
+      } else {
+        throw new Error('Ollama not initialized');
       }
-    } else {
+    } catch (error) {
+      console.log('Using enhanced fallback AI response for:', userMessage);
       aiResponse = await this.generateFallbackResponse(userMessage, session);
     }
 
@@ -146,7 +128,7 @@ export class OllamaConversationAI {
   }
 
   private async generateOllamaResponse(messages: ConversationMessage[]): Promise<string> {
-    // Format messages for Ollama
+    // Format messages for Ollama API
     const conversationText = messages
       .filter(msg => msg.role !== 'system')
       .map(msg => `${msg.role}: ${msg.content}`)
@@ -157,13 +139,46 @@ export class OllamaConversationAI {
     const prompt = `${systemContext}\n\nConversation:\n${conversationText}\nassistant:`;
     
     try {
-      const { stdout } = await execAsync(`ollama run llama3:8b "${prompt.replace(/"/g, '\\"')}"`, {
-        timeout: 30000,
-        maxBuffer: 1024 * 1024
-      });
+      // Use Ollama HTTP API with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
       
-      return stdout.trim() || 'I apologize, but I encountered an issue generating a response. Could you please rephrase your question?';
+      const response = await fetch('http://localhost:11434/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama3:8b',
+          prompt: prompt,
+          stream: false,
+          options: {
+            temperature: 0.7,
+            top_p: 0.9,
+            top_k: 40,
+            num_predict: 500
+          }
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Ollama API responded with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const aiResponse = data.response?.trim();
+      
+      if (!aiResponse) {
+        throw new Error('Empty response from Ollama');
+      }
+      
+      console.log('Ollama generated response successfully');
+      return aiResponse;
     } catch (error) {
+      console.warn('Ollama API call failed, using fallback:', error instanceof Error ? error.message : String(error));
       throw new Error(`Ollama generation failed: ${error}`);
     }
   }
@@ -460,31 +475,152 @@ ${validatorContext?.riskLevel === 'red' ?
 Would you like more details about any specific incident or guidance on next steps?`;
     }
 
+    // Enhanced fallback responses for broader questions
+    if (lowerMessage.includes('best validator') || lowerMessage.includes('choose validator') || lowerMessage.includes('recommend validator')) {
+      return `**How to Choose the Best Validators on Sei**
+
+Using Mars² scoring system, here's how to identify top validators:
+
+**Mars² Scoring Criteria (0-100):**
+• **Green (80+)**: Excellent performance, safe to stake
+• **Yellow (60-79)**: Good validators, monitor regularly  
+• **Red (<60)**: High risk, avoid or unstake
+
+**Top Validator Characteristics:**
+• **High Uptime**: 99%+ block signing rate
+• **Low Commission**: 0-7% (more rewards for you)
+• **Active Governance**: Participates in proposals
+• **Community Presence**: Responsive, transparent
+• **Technical Reliability**: Proper infrastructure
+
+**For ${validatorName}:**
+• **Current Score**: ${validatorContext?.currentScore || 'Unknown'}
+• **Risk Level**: ${validatorContext?.riskLevel?.toUpperCase() || 'Unknown'}
+• **Status**: ${validatorContext?.status === 'BOND_STATUS_BONDED' ? 'ACTIVE' : 'INACTIVE'}
+
+**Diversification Strategy:**
+• Spread stake across 3-5 green validators
+• Mix commission rates (0%, 5%, 7%)
+• Include both large and mid-size validators
+• Monitor Mars² scores weekly
+
+**Red Flags to Avoid:**
+• Frequent jailing events
+• Commission rate increases
+• Poor governance participation
+• Technical downtime patterns
+
+Want specific validator recommendations or help analyzing current performance?`;
+    }
+
+    if (lowerMessage.includes('mars') && (lowerMessage.includes('contract') || lowerMessage.includes('smart contract') || lowerMessage.includes('how it works'))) {
+      return `**Mars² Smart Contract System**
+
+Mars² uses three deployed smart contracts on Sei EVM testnet:
+
+**1. MarsValidatorScore Contract**
+• **Address**: 0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294
+• **Purpose**: Stores validator risk scores (0-100)
+• **Functions**: getScore(), updateScore(), getEvents()
+• **Methodology**: Analyzes uptime, governance, commission, incidents
+
+**2. MarsZkAttest Contract**
+• **Address**: 0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae  
+• **Purpose**: Anonymous incident reporting with ZK-proofs
+• **Features**: Nullifier generation, Sybil resistance
+• **Privacy**: Zero-knowledge attestations
+
+**3. MarsValidatorGroupMessages Contract**
+• **Address**: 0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950
+• **Purpose**: Encrypted group messaging for validators
+• **Security**: AES-256 encryption simulation
+• **Use Cases**: Coordination, alerts, governance discussions
+
+**How Mars² Scoring Works:**
+1. **Data Collection**: Real-time Sei network monitoring
+2. **Performance Analysis**: Uptime, missed blocks, response time
+3. **Economic Factors**: Commission rates, self-delegation
+4. **Governance Scoring**: Voting participation, proposal quality
+5. **Incident Integration**: Anonymous reports affect scores
+6. **Smart Contract Updates**: Automated score updates
+
+**Integration with Sei:**
+• Reads validator data from Sei REST API
+• Monitors on-chain events and transactions
+• Cross-references with community reports
+• Updates scores based on performance metrics
+
+Want to know more about a specific contract or the scoring methodology?`;
+    }
+
+    if (lowerMessage.includes('sei') && (lowerMessage.includes('what is') || lowerMessage.includes('explain') || lowerMessage.includes('how does'))) {
+      return `**Sei Blockchain Overview**
+
+Sei is a high-performance, Cosmos-based blockchain with EVM compatibility designed for DeFi applications.
+
+**Key Features:**
+• **Consensus**: Tendermint BFT with ~100 validators
+• **EVM Compatible**: Run Ethereum smart contracts
+• **Fast Finality**: ~600ms block times
+• **Cosmos SDK**: IBC compatibility with other chains
+• **Testnet**: Atlantic-2 (current testing environment)
+
+**Staking Mechanism:**
+• **Token**: SEI (6 decimal places)
+• **Validator Set**: ~100 active validators
+• **Delegation**: Stake to validators for rewards
+• **Unbonding**: 21-day period for unstaking
+• **Slashing**: 0.01% (downtime), 5% (double-signing)
+
+**How Validators Work:**
+1. **Block Production**: Validators take turns proposing blocks
+2. **Consensus**: Byzantine Fault Tolerant voting
+3. **Rewards**: Block rewards + transaction fees
+4. **Commission**: Validators keep percentage, rest to delegators
+
+**Mars² Integration:**
+• **Enhanced Security**: Real-time validator monitoring
+• **Risk Assessment**: 0-100 scoring system
+• **Anonymous Reporting**: Community-driven incident alerts
+• **Smart Contracts**: On-chain validator data and scoring
+
+**Governance:**
+• **Proposals**: Network upgrades, parameter changes
+• **Voting**: Validators and delegators participate
+• **Implementation**: Automated execution of passed proposals
+
+**For ${validatorName}:**
+This validator is ${validatorContext?.status === 'BOND_STATUS_BONDED' ? 'actively participating' : 'currently inactive'} in Sei consensus with a Mars² score of ${validatorContext?.currentScore || 'unknown'}.
+
+Would you like to learn more about Sei staking mechanics or validator operations?`;
+    }
+
     // Default educational response
     return `**Welcome to Mars² Validator Education**
 
-I'm here to help you understand Sei network staking and ${validatorName} specifically.
+I'm your AI assistant for understanding Sei staking and ${validatorName} specifically.
 
-**Popular Topics:**
-• **"What does jailed mean?"** - Learn about validator penalties
-• **"Why is this validator inactive?"** - Understand validator statuses  
-• **"What's a commission rate?"** - Learn about validator fees
-• **"Should I unstake?"** - Get personalized advice
-• **"How does redelegation work?"** - Learn about moving stake
-• **"What's slashing?"** - Understand staking risks
-• **"Explain the Mars² score"** - Learn our risk assessment
+**Popular Questions:**
+• **"What are the best validators on Sei?"** - Validator selection guide
+• **"Explain Mars² smart contracts"** - How our platform works
+• **"What is Sei blockchain?"** - Network overview and features
+• **"Why is this validator jailed/inactive?"** - Status explanations
+• **"What's a good commission rate?"** - Fee analysis
+• **"Should I unstake or redelegate?"** - Personalized advice
+• **"How does slashing work?"** - Risk explanations
 
 **About ${validatorName}:**
-• Address: ${session.validatorAddress}
-• Current Status: ${validatorContext?.status || 'Unknown'}
-• Mars² Score: ${validatorContext?.currentScore || 'Unknown'}
+• **Address**: ${session.validatorAddress}
+• **Current Status**: ${validatorContext?.status === 'BOND_STATUS_BONDED' ? 'ACTIVE (Earning Rewards)' : 'INACTIVE (No Rewards)'}
+• **Mars² Score**: ${validatorContext?.currentScore || 'Unknown'} (${validatorContext?.riskLevel?.toUpperCase() || 'Unknown'} Risk)
 
-**How to Ask Questions:**
-• Be specific: "Why was this validator jailed?"
-• Ask for examples: "Show me how commission affects my rewards"
-• Request guidance: "Should I redelegate to a different validator?"
+**How to Get Help:**
+• Ask specific questions about staking concepts
+• Request validator comparisons and recommendations  
+• Get guidance on unstaking, redelegation, or risk management
+• Learn about Mars² platform features and smart contracts
 
-What would you like to learn about Sei staking or ${validatorName}?`;
+What would you like to learn about Sei staking or validator analysis?`;
   }
 
   getSession(sessionId: string): ConversationSession | null {
