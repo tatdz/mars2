@@ -134,6 +134,52 @@ const docSections = [
     }
   },
   {
+    id: "contracts",
+    title: "Smart Contracts",
+    icon: FileText,
+    content: {
+      title: "Sei EVM Smart Contracts",
+      description: "Mars² smart contract addresses and explorer links on Sei testnet",
+      sections: [
+        {
+          title: "MarsValidatorScore Contract",
+          content: "Address: 0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294\n\nThis contract handles validator scoring and score updates based on performance metrics and incident reports.\n\nExplorer: https://seitrace.com/address/0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294?chain=atlantic-2&tab=transactions"
+        },
+        {
+          title: "MarsZkAttest Contract", 
+          content: "Address: 0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae\n\nThis contract manages anonymous incident reporting using zero-knowledge proofs for privacy-preserving attestations.\n\nExplorer: https://seitrace.com/address/0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae?chain=atlantic-2&tab=transactions"
+        },
+        {
+          title: "MarsValidatorGroupMessages Contract",
+          content: "Address: 0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950\n\nThis contract enables encrypted group messaging between validators for coordination and transparency.\n\nExplorer: https://seitrace.com/address/0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950?chain=atlantic-2&tab=transactions"
+        }
+      ]
+    }
+  },
+  {
+    id: "userflow",
+    title: "User Flow",
+    icon: Users,
+    content: {
+      title: "How to Use Mars²",
+      description: "Step-by-step guides for stakers and validators",
+      sections: [
+        {
+          title: "For Stakers",
+          content: "1. Connect MetaMask wallet to Sei testnet\n2. Browse validator dashboard to see real-time scores\n3. Use color-coded system:\n   • Green (80-100): Safe validators to stake with\n   • Yellow (50-79): Monitor closely, moderate risk\n   • Red (0-49): High risk, consider unstaking\n4. Click info button for detailed score breakdowns\n5. Report incidents anonymously if you observe validator issues\n6. Monitor your chosen validators regularly for score changes"
+        },
+        {
+          title: "For Validators",
+          content: "1. Connect MetaMask wallet to access validator features\n2. Monitor your own score on the dashboard\n3. Set up encrypted messaging:\n   • Generate secure keys in messaging section\n   • Import keys from other validators you trust\n   • Send encrypted messages to coordinate with other validators\n4. Respond to incident reports professionally\n5. Maintain high uptime and governance participation\n6. Use messaging system for emergency coordination"
+        },
+        {
+          title: "Anonymous Reporting Flow",
+          content: "1. Navigate to any validator's row in the dashboard\n2. Click the yellow warning icon to report an incident\n3. Select incident type (missed blocks, downtime, etc.)\n4. Provide detailed description of the issue\n5. Submit report - your identity remains anonymous\n6. Report is verified using zero-knowledge proofs\n7. Validator's score updates automatically if report is valid\n8. Monitor the validator to see if issue is resolved"
+        }
+      ]
+    }
+  },
+  {
     id: "api",
     title: "API Reference",
     icon: FileText,
@@ -142,8 +188,8 @@ const docSections = [
       description: "Integration guides and API endpoints for developers",
       sections: [
         {
-          title: "Smart Contracts",
-          content: "Mars² uses three main contracts on Sei EVM:\n\n• MarsValidatorScore: 0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294\n  Validator scoring and updates\n  https://seitrace.com/address/0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294?chain=atlantic-2&tab=transactions\n\n• MarsZkAttest: 0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae\n  Anonymous incident reporting\n  https://seitrace.com/address/0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae?chain=atlantic-2&tab=transactions\n\n• MarsValidatorGroupMessages: 0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950\n  Encrypted group messaging\n  https://seitrace.com/address/0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950?chain=atlantic-2&tab=transactions"
+          title: "REST API Endpoints",
+          content: "• GET /api/sei/validators - Fetch all validator data\n• POST /api/reports - Submit incident reports\n• GET /api/scores/{address} - Get validator score\n• WebSocket /ws - Real-time score updates"
         },
         {
           title: "Data Sources",

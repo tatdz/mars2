@@ -137,3 +137,6 @@ Preferred communication style: Simple, everyday language.
 - **Validator Selection**: Added dropdown with validator names and addresses for better UX
 - **Form Validation**: Reduced minimum description requirement from 20 to 10 characters
 - **README.md**: Created comprehensive documentation with contract addresses and setup instructions
+- **Documentation Reorganization**: Split Smart Contracts into separate section and added User Flow guides
+- **UI/UX Improvements**: Fixed text visibility issues and made action buttons more prominent
+- **Button Enhancements**: Increased size of report and info buttons for better user experience
