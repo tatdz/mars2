@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useValidators } from "@/hooks/useValidators";
-import { scoreValidator, getScoreColor, getScoreColorClass, getStatusColor, getStatusText } from "@/lib/scoring";
+import { scoreValidator, getScoreColor, getScoreColorClass, getStatusColor, getStatusText, getNextActionMessage } from "@/lib/scoring";
 import { formatAddress } from "@/lib/crypto";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ReportModal } from "./ReportModal";
-import { AlertTriangle, Info, RefreshCw } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ReportModal } from "@/components/ReportModal";
+import { AlertTriangle, Info, RefreshCw, CheckCircle, Triangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function ValidatorTable() {
@@ -146,12 +147,14 @@ export function ValidatorTable() {
                   const scoreColorClass = getScoreColorClass(score);
                   const statusColor = getStatusColor(validator.status, validator.jailed);
                   const statusText = getStatusText(validator.status, validator.jailed);
+                  const actionMessage = getNextActionMessage(score);
 
                   return (
-                    <TableRow 
-                      key={validator.operator_address} 
-                      className="border-gray-700 hover:bg-gray-700/50 transition-colors"
-                    >
+                    <>
+                      <TableRow 
+                        key={validator.operator_address} 
+                        className="border-gray-700 hover:bg-gray-700/50 transition-colors"
+                      >
                       <TableCell>
                         <div className="flex items-center space-x-3">
                           <div className="w-8 h-8 bg-sei-blue rounded-full flex items-center justify-center text-sm font-bold">
@@ -231,6 +234,57 @@ export function ValidatorTable() {
                         </div>
                       </TableCell>
                     </TableRow>
+                    
+                    {/* Action Recommendation Row */}
+                    <TableRow 
+                      key={`${validator.operator_address}-action`}
+                      className="border-gray-700 bg-gray-800/30"
+                    >
+                      <TableCell colSpan={6} className="py-3">
+                        <Alert className={`border-l-4 ${
+                          actionMessage.color === 'green' 
+                            ? 'border-validator-green bg-validator-green/5' 
+                            : actionMessage.color === 'yellow' 
+                            ? 'border-validator-yellow bg-validator-yellow/5' 
+                            : 'border-validator-red bg-validator-red/5'
+                        }`}>
+                          <div className="flex items-start space-x-3">
+                            {actionMessage.color === 'green' ? (
+                              <CheckCircle className="w-5 h-5 text-validator-green mt-0.5" />
+                            ) : actionMessage.color === 'yellow' ? (
+                              <Triangle className="w-5 h-5 text-validator-yellow mt-0.5" />
+                            ) : (
+                              <AlertTriangle className="w-5 h-5 text-validator-red mt-0.5" />
+                            )}
+                            <div className="flex-1">
+                              <div className={`font-semibold text-sm mb-1 ${
+                                actionMessage.color === 'green' 
+                                  ? 'text-validator-green' 
+                                  : actionMessage.color === 'yellow' 
+                                  ? 'text-validator-yellow' 
+                                  : 'text-validator-red'
+                              }`}>
+                                {actionMessage.title}
+                              </div>
+                              <AlertDescription className="text-xs text-gray-400">
+                                {actionMessage.action}
+                              </AlertDescription>
+                            </div>
+                            {actionMessage.showAlert && score < 80 && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleReportClick(validator.operator_address)}
+                                className="text-xs border-validator-yellow text-validator-yellow hover:bg-validator-yellow/10"
+                              >
+                                View Reports
+                              </Button>
+                            )}
+                          </div>
+                        </Alert>
+                      </TableCell>
+                    </TableRow>
+                  </>
                   );
                 })
               )}

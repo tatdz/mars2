@@ -29,15 +29,15 @@ export function Header() {
           <nav className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
-                <a
-                  className={`transition-colors ${
+                <span
+                  className={`cursor-pointer transition-colors ${
                     location === item.href
                       ? "text-white"
                       : "text-gray-300 hover:text-white"
                   }`}
                 >
                   {item.label}
-                </a>
+                </span>
               </Link>
             ))}
           </nav>

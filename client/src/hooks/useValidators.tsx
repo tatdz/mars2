@@ -21,12 +21,15 @@ export function useValidators() {
     staleTime: 30000, // Consider data stale after 30 seconds
   });
 
-  const validatorsWithScores: ValidatorScore[] = (query.data || []).map(validator => ({
-    validator: validator.operator_address,
-    score: scoreValidator(validator),
-    color: validator.score >= 80 ? 'green' : validator.score >= 50 ? 'yellow' : 'red',
-    events: [], // TODO: Fetch from smart contract
-  }));
+  const validatorsWithScores: ValidatorScore[] = (query.data || []).map(validator => {
+    const score = scoreValidator(validator);
+    return {
+      validator: validator.operator_address,
+      score: score,
+      color: score >= 80 ? 'green' as const : score >= 50 ? 'yellow' as const : 'red' as const,
+      events: [], // TODO: Fetch from smart contract
+    };
+  });
 
   return {
     ...query,

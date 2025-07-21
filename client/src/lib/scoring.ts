@@ -86,3 +86,33 @@ export function getStatusText(status: string, jailed: boolean): string {
   if (status === 'BOND_STATUS_UNBONDING') return 'Unbonding';
   return 'Unknown';
 }
+
+export interface ActionMessage {
+  title: string;
+  action: string;
+  color: 'green' | 'yellow' | 'red';
+  showAlert?: boolean;
+}
+
+export function getNextActionMessage(score: number): ActionMessage {
+  if (score >= 80) {
+    return {
+      title: "✅ Validator Health: Excellent",
+      action: "This validator is healthy. Uptime and performance are excellent. You can stake confidently. No action is needed.",
+      color: "green"
+    };
+  } else if (score >= 50) {
+    return {
+      title: "⚠️ Validator Health: Moderate Risk",
+      action: "This validator's status requires monitoring. Some incidents may be affecting performance. View validator's performance history and consider reducing stake if the issue persists.",
+      color: "yellow"
+    };
+  } else {
+    return {
+      title: "🚨 Validator Health: High Risk",
+      action: "⚠️ This validator is unstable or has been flagged. Take action immediately. Unstake from this validator and choose a safer validator to delegate to.",
+      color: "red",
+      showAlert: true
+    };
+  }
+}

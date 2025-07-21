@@ -9,7 +9,7 @@ export async function encryptMessage(message: string, key?: string): Promise<str
   // For now, we'll use a simple base64 encoding to simulate encryption
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
-  const base64 = btoa(String.fromCharCode(...data));
+  const base64 = btoa(String.fromCharCode.apply(null, Array.from(data)));
   return `encrypted_${base64}`;
 }
 
