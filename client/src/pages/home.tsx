@@ -13,7 +13,7 @@ export default function Home() {
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold text-white">Validator Dashboard</h1>
                 <p className="text-gray-400">
-                  Real-time monitoring of Sei testnet validators with risk scoring and security analysis
+                  A unified lens on risk and collaboration for users and validators on Sei
                 </p>
               </div>
             </div>
