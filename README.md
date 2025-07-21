@@ -37,10 +37,10 @@ Mars² uses three main contracts deployed on Sei EVM Testnet (Atlantic-2):
 ## Getting Started
 
 1.**Clone the repository**
-```bash
-git clone https://github.com/tatdz/mars2.git
-cd mars2
-```
+   ```bash
+   git clone https://github.com/tatdz/mars2.git
+   cd mars2
+   ```
 2. **Install Dependencies**
    ```bash
    npm install
