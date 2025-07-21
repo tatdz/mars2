@@ -13,10 +13,8 @@ import {
   Bot,
   Loader2,
   X,
-  MessageCircle,
   Zap
 } from "lucide-react";
-import { ConversationModal } from './ConversationModal';
 
 interface Delegation {
   validator_address: string;
@@ -45,8 +43,7 @@ export function StakingRecommendations() {
   const [error, setError] = useState<string | null>(null);
   const [aiResponse, setAiResponse] = useState<{ message: string; type: string } | null>(null);
   const [showAiChat, setShowAiChat] = useState(false);
-  const [showConversation, setShowConversation] = useState(false);
-  const [conversationValidator, setConversationValidator] = useState<{ name: string; address: string; context?: any }>({ name: '', address: '' });
+
 
   const fetchRecommendations = async () => {
     if (!address) return;
@@ -169,18 +166,7 @@ export function StakingRecommendations() {
     setAiResponse(null);
   };
 
-  const startConversation = (validatorName: string, validatorAddress: string, delegation: Delegation) => {
-    setConversationValidator({
-      name: validatorName,
-      address: validatorAddress,
-      context: {
-        score: delegation.mars_score,
-        riskLevel: delegation.risk_level,
-        status: 'Active' // You could fetch this from validator data
-      }
-    });
-    setShowConversation(true);
-  };
+
 
   const handleAskAIAboutIncidents = async (validatorName: string, score: number) => {
     try {
@@ -333,7 +319,7 @@ export function StakingRecommendations() {
                       
                       {/* Only show action buttons for non-green validators */}
                       {delegation.risk_level !== 'green' && (
-                        <div className="grid grid-cols-2 gap-2 mb-3">
+                        <div className="grid grid-cols-3 gap-2 mb-3">
                           <Button
                             size="sm"
                             onClick={() => delegation.callbacks && handleCallback(delegation.callbacks.unstake, 'unstake', delegation.validator_name)}
@@ -360,15 +346,6 @@ export function StakingRecommendations() {
                           >
                             <Zap className="w-3 h-3 mr-1" />
                             Details
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => startConversation(delegation.validator_name, delegation.validator_address, delegation)}
-                            className="bg-blue-600 text-white hover:bg-blue-700 border-0"
-                            disabled={loading}
-                          >
-                            <MessageCircle className="w-3 h-3 mr-1" />
-                            Chat
                           </Button>
                         </div>
                       )}
@@ -464,14 +441,7 @@ export function StakingRecommendations() {
         </div>
       )}
 
-      {/* Conversation Modal */}
-      <ConversationModal
-        isOpen={showConversation}
-        onClose={() => setShowConversation(false)}
-        validatorName={conversationValidator.name}
-        validatorAddress={conversationValidator.address}
-        initialContext={conversationValidator.context}
-      />
+
     </div>
   );
 }
