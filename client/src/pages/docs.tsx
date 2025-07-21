@@ -1,326 +1,295 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ExternalLink, Shield, UserX, Lock, Database, TrendingUp, Wallet, Search, AlertTriangle } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  Shield, 
+  AlertTriangle, 
+  Eye, 
+  Lock, 
+  Users, 
+  Zap,
+  BookOpen,
+  FileText,
+  Settings,
+  HelpCircle,
+  ExternalLink
+} from "lucide-react";
 
-const contractAddresses = [
+const docSections = [
   {
-    name: "MarsValidatorScore",
-    address: "0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294",
-    url: "https://seitrace.com/address/0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294?chain=atlantic-2&tab=transactions",
-    color: "text-validator-green",
+    id: "overview",
+    title: "Overview",
+    icon: BookOpen,
+    content: {
+      title: "Mars² Staking Security Explorer",
+      description: "Real-time validator monitoring and risk assessment for Sei EVM testnet",
+      sections: [
+        {
+          title: "What is Mars²?",
+          content: "Mars² is a comprehensive staking security platform that helps delegators make informed decisions by providing real-time validator performance metrics, anonymous incident reporting, and secure validator communication channels."
+        },
+        {
+          title: "Key Features",
+          content: "• Real-time validator scoring and risk assessment\n• Anonymous incident reporting with zero-knowledge proofs\n• Encrypted validator group messaging\n• Plain English recommendations for stakers"
+        },
+        {
+          title: "Network Support",
+          content: "Currently supports Sei EVM Testnet (Atlantic-2) with plans to expand to mainnet and other Cosmos-based networks."
+        }
+      ]
+    }
   },
   {
-    name: "MarsZkAttest",
-    address: "0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae",
-    url: "https://seitrace.com/address/0x45d1DfaC9051d1B2552126D68caD5E6d3B9c5Cae?chain=atlantic-2&tab=transactions",
-    color: "text-validator-yellow",
+    id: "scoring",
+    title: "Validator Scoring",
+    icon: Shield,
+    content: {
+      title: "Understanding Validator Scores",
+      description: "How Mars² calculates and presents validator risk assessments",
+      sections: [
+        {
+          title: "Score Calculation",
+          content: "Validator scores range from 0-100 and are calculated based on:\n• Uptime percentage (40% weight)\n• Block production consistency (30% weight)\n• Governance participation (20% weight)\n• Community reports and incidents (10% weight)"
+        },
+        {
+          title: "Score Categories",
+          content: "🟢 Green (80-100): Safe to stake freely\n🟡 Yellow (50-79): Monitor closely, acceptable risk\n🔴 Red (0-49): Consider unstaking immediately"
+        },
+        {
+          title: "Real-time Updates",
+          content: "Scores are updated every 30 seconds using live data from Sei blockchain explorers and on-chain smart contracts."
+        }
+      ]
+    }
   },
   {
-    name: "MarsValidatorGroupMessages",
-    address: "0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950",
-    url: "https://seitrace.com/address/0x9FE44Ee4805318bc5093A1daE2cc42A519dDD950?chain=atlantic-2&tab=transactions",
-    color: "text-purple-400",
-  },
-];
-
-const features = [
-  {
-    icon: TrendingUp,
-    title: "Automated validator risk scoring",
-    description: "Real-time scoring based on uptime, missed blocks, and governance participation",
-    color: "text-validator-green",
-  },
-  {
-    icon: UserX,
-    title: "Anonymous, Sybil-resistant incident reports",
-    description: "Zero-knowledge proofs ensure anonymous reporting while preventing spam",
-    color: "text-validator-yellow",
-  },
-  {
-    icon: Lock,
-    title: "Encrypted validator group messages",
-    description: "AES-256 encrypted on-chain messaging with selective revelation",
-    color: "text-sei-blue",
-  },
-  {
-    icon: Database,
-    title: "On-chain storage and verification",
-    description: "All data stored permanently on Sei EVM testnet for transparency",
-    color: "text-purple-400",
-  },
-];
-
-const techStack = [
-  { category: "Frontend", tech: "React + ethers.js v6" },
-  { category: "Wallet", tech: "MetaMask" },
-  { category: "Contracts", tech: "Solidity 0.8.28" },
-  { category: "Network", tech: "Sei EVM Testnet" },
-  { category: "Encryption", tech: "AES-256 + Ed25519" },
-  { category: "Data Feed", tech: "Sei Explorers API" },
-];
-
-const userJourney = [
-  {
-    icon: Wallet,
-    title: "Connect Wallet",
-    description: "Connect MetaMask to Sei EVM testnet",
-    color: "text-sei-blue",
-  },
-  {
-    icon: Search,
-    title: "Browse Validators",
-    description: "View real-time scores and performance",
-    color: "text-validator-green",
-  },
-  {
+    id: "reporting",
+    title: "Anonymous Reporting",
     icon: AlertTriangle,
-    title: "Report & Collaborate",
-    description: "Submit reports and read encrypted messages",
-    color: "text-validator-yellow",
-  },
-];
-
-const colorLegend = [
-  { range: "80–100", color: "text-validator-green bg-validator-green", label: "Stake freely" },
-  { range: "50–79", color: "text-validator-yellow bg-validator-yellow", label: "Monitor closely" },
-  { range: "0–49", color: "text-validator-red bg-validator-red", label: "Unstake" },
-];
-
-const troubleshooting = [
-  {
-    issue: "Attest already exists",
-    solution: "nullifier is reused",
-  },
-  {
-    issue: "Message not revealed",
-    solution: "already revealed or invalid index",
+    content: {
+      title: "Incident Reporting System",
+      description: "Submit anonymous validator incident reports using zero-knowledge proofs",
+      sections: [
+        {
+          title: "Privacy Protection",
+          content: "All reports are submitted anonymously using zero-knowledge proofs. Your identity is never revealed, but double-reporting is prevented through cryptographic nullifiers."
+        },
+        {
+          title: "Report Types",
+          content: "• Missed blocks (>10 in 1 hour)\n• Validator jailed events\n• Network downtime incidents\n• Double signing violations\n• Other network disruptions"
+        },
+        {
+          title: "Impact on Scores",
+          content: "Verified reports automatically adjust validator scores based on incident severity. Community consensus helps maintain report accuracy."
+        }
+      ]
+    }
   },
   {
-    issue: "Wallet not connected",
-    solution: "add Sei EVM testnet in MetaMask",
+    id: "messaging",
+    title: "Validator Messages",
+    icon: Lock,
+    content: {
+      title: "Encrypted Group Communication",
+      description: "Secure messaging system for validator coordination",
+      sections: [
+        {
+          title: "End-to-End Encryption",
+          content: "Messages are encrypted using AES-256-GCM with validator-generated keys. Only group members can decrypt and read messages."
+        },
+        {
+          title: "Key Management",
+          content: "Validators can generate new encryption keys, import existing ones, or share keys securely with trusted validators."
+        },
+        {
+          title: "Emergency Transparency",
+          content: "During critical network events, messages may be revealed to stakers for transparency and coordination as outlined in validator agreements."
+        }
+      ]
+    }
   },
+  {
+    id: "integration",
+    title: "MetaMask Integration",
+    icon: Settings,
+    content: {
+      title: "Wallet Connection Guide",
+      description: "How to connect and interact with Mars² using MetaMask",
+      sections: [
+        {
+          title: "Network Configuration",
+          content: "Mars² automatically configures MetaMask for Sei EVM Testnet:\n• Network Name: Sei Testnet\n• RPC URL: https://evm-rpc-testnet.sei-apis.com\n• Chain ID: 1328\n• Currency: SEI"
+        },
+        {
+          title: "Required Permissions",
+          content: "Mars² requests minimal permissions:\n• Account access for identity verification\n• Transaction signing for reports and messages\n• Network switching for Sei testnet"
+        },
+        {
+          title: "Security Best Practices",
+          content: "• Only connect trusted wallets\n• Verify transaction details before signing\n• Keep your seed phrase secure\n• Use hardware wallets when possible"
+        }
+      ]
+    }
+  },
+  {
+    id: "api",
+    title: "API Reference",
+    icon: FileText,
+    content: {
+      title: "Developer Documentation",
+      description: "Integration guides and API endpoints for developers",
+      sections: [
+        {
+          title: "Smart Contracts",
+          content: "Mars² uses three main contracts on Sei EVM:\n• MarsValidatorScore: Validator scoring and updates\n• MarsZkAttest: Anonymous incident reporting\n• MarsGroupMsg: Encrypted group messaging"
+        },
+        {
+          title: "Data Sources",
+          content: "• Sei blockchain explorers for validator data\n• On-chain events for real-time updates\n• Community reports for incident tracking"
+        },
+        {
+          title: "Rate Limits",
+          content: "API calls are rate-limited to ensure fair usage:\n• Validator data: 1 request per 30 seconds\n• Report submissions: 1 per incident per user\n• Messages: 10 per hour per validator"
+        }
+      ]
+    }
+  }
 ];
 
-export default function Docs() {
+export function DocsPage() {
+  const [selectedSection, setSelectedSection] = useState("overview");
+  
+  const currentSection = docSections.find(section => section.id === selectedSection);
+
   return (
-    <div className="min-h-screen bg-dark-bg p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Mars² Documentation</h1>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Complete technical documentation for the Mars² staking security explorer on Sei EVM testnet.
-          </p>
-        </div>
-
-        {/* Problem Statement & Mission */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          <Card className="bg-dark-card border-gray-700">
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left Navigation */}
+        <div className="lg:col-span-1">
+          <Card className="bg-dark-card border-gray-700 sticky top-6">
             <CardHeader>
-              <CardTitle className="text-xl">Problem Statement</CardTitle>
+              <CardTitle className="text-white flex items-center space-x-2">
+                <BookOpen className="w-5 h-5" />
+                <span>Documentation</span>
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-300">
-                Validators on Sei often miss blocks or become jailed. Stakers cannot report or respond securely. 
-                Mars² solves this with scoring, reporting, and encrypted coordination.
-              </p>
-              
-              <div>
-                <h4 className="font-semibold mb-2">Mission</h4>
-                <p className="text-gray-300 text-sm">
-                  To give delegators real-time staking intelligence and give validators encrypted onchain channels—improving 
-                  security for the entire Sei network.
-                </p>
-              </div>
+            <CardContent className="p-0">
+              <nav className="space-y-1">
+                {docSections.map((section) => {
+                  const Icon = section.icon;
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => setSelectedSection(section.id)}
+                      className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-colors ${
+                        selectedSection === section.id
+                          ? "bg-purple-accent text-white"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="text-sm font-medium">{section.title}</span>
+                    </button>
+                  );
+                })}
+              </nav>
             </CardContent>
           </Card>
+        </div>
 
-          <Card className="bg-dark-card border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-xl">Key Features</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <feature.icon className={`w-5 h-5 mt-0.5 ${feature.color}`} />
-                    <div>
-                      <div className="font-medium">{feature.title}</div>
-                      <div className="text-sm text-gray-400">{feature.description}</div>
+        {/* Main Content */}
+        <div className="lg:col-span-3">
+          {currentSection && (
+            <Card className="bg-dark-card border-gray-700">
+              <CardHeader>
+                <div className="flex items-center space-x-3">
+                  <currentSection.icon className="w-6 h-6 text-purple-accent" />
+                  <div>
+                    <CardTitle className="text-white text-2xl">
+                      {currentSection.content.title}
+                    </CardTitle>
+                    <p className="text-gray-400 mt-1">
+                      {currentSection.content.description}
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {currentSection.content.sections.map((section, index) => (
+                  <div key={index} className="space-y-3">
+                    <h3 className="text-lg font-semibold text-white">
+                      {section.title}
+                    </h3>
+                    <div className="text-gray-300 leading-relaxed whitespace-pre-line">
+                      {section.content}
                     </div>
+                    {index < currentSection.content.sections.length - 1 && (
+                      <Separator className="bg-gray-600" />
+                    )}
                   </div>
                 ))}
-              </div>
-            </CardContent>
-          </Card>
+
+                {/* Additional Info Cards */}
+                {selectedSection === "overview" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <Card className="bg-dark-bg border-gray-600">
+                      <CardContent className="pt-4">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Users className="w-5 h-5 text-green-400" />
+                          <span className="font-semibold text-white">Active Validators</span>
+                        </div>
+                        <p className="text-2xl font-bold text-green-400">100</p>
+                        <p className="text-xs text-gray-400">Monitored on Sei testnet</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-dark-bg border-gray-600">
+                      <CardContent className="pt-4">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Eye className="w-5 h-5 text-purple-accent" />
+                          <span className="font-semibold text-white">Reports Filed</span>
+                        </div>
+                        <p className="text-2xl font-bold text-purple-accent">156</p>
+                        <p className="text-xs text-gray-400">Anonymous & verified</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {selectedSection === "scoring" && (
+                  <div className="bg-dark-bg border border-gray-600 rounded-lg p-4 mt-6">
+                    <h4 className="font-semibold text-white mb-3">Score Examples</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-300">Validator with 99.9% uptime</span>
+                        <Badge className="bg-green-500 text-white">95 Score</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-300">Validator with recent downtime</span>
+                        <Badge className="bg-yellow-500 text-black">72 Score</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-300">Validator with slashing event</span>
+                        <Badge className="bg-red-500 text-white">25 Score</Badge>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2 text-sm text-gray-400 pt-4 border-t border-gray-600">
+                  <HelpCircle className="w-4 h-4" />
+                  <span>Need help? Contact the Mars² team or check our</span>
+                  <a href="#" className="text-purple-accent hover:text-purple-300 inline-flex items-center space-x-1">
+                    <span>GitHub repository</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
-
-        {/* Contract Addresses */}
-        <Card className="bg-dark-card border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-xl">Deployed Contract Addresses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
-              {contractAddresses.map((contract, index) => (
-                <div key={index} className="space-y-3">
-                  <div className={`font-medium ${contract.color}`}>{contract.name}</div>
-                  <div className="text-gray-400 font-mono text-xs break-all">{contract.address}</div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    asChild
-                    className="border-gray-600 hover:bg-gray-700"
-                  >
-                    <a href={contract.url} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="w-3 h-3 mr-1" />
-                      View on Explorer
-                    </a>
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Tech Stack */}
-        <Card className="bg-dark-card border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-xl">Tech Stack</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {techStack.map((item, index) => (
-                <div key={index} className="space-y-1">
-                  <div className="font-medium text-gray-300">{item.category}</div>
-                  <div className="text-gray-400">{item.tech}</div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* User Journey */}
-        <Card className="bg-dark-card border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-xl">User Journey</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
-              {userJourney.map((step, index) => (
-                <div key={index} className="text-center space-y-3">
-                  <div className={`w-12 h-12 ${step.color.replace('text-', 'bg-')} rounded-full flex items-center justify-center mx-auto`}>
-                    <step.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-1">{index + 1}. {step.title}</h4>
-                    <p className="text-sm text-gray-400">{step.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Color Code Legend */}
-        <Card className="bg-dark-card border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-xl">Color Code Legend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-700">
-                    <th className="text-left py-2 px-4">Score</th>
-                    <th className="text-left py-2 px-4">Color</th>
-                    <th className="text-left py-2 px-4">Action Suggested</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {colorLegend.map((item, index) => (
-                    <tr key={index} className="border-b border-gray-700">
-                      <td className="py-2 px-4">{item.range}</td>
-                      <td className="py-2 px-4">
-                        <Badge className={`${item.color} bg-opacity-20`}>
-                          {item.range}
-                        </Badge>
-                      </td>
-                      <td className="py-2 px-4 text-gray-400">{item.label}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Troubleshooting */}
-        <Card className="bg-dark-card border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-xl">Troubleshooting</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {troubleshooting.map((item, index) => (
-                <div key={index} className="flex justify-between items-center py-2">
-                  <span className="font-medium text-validator-red">"{item.issue}":</span>
-                  <span className="text-gray-400">{item.solution}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Network Information */}
-        <Card className="bg-dark-card border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-xl">Network Configuration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold mb-3">Sei EVM Testnet Details</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Network Name:</span>
-                    <span>Sei EVM Testnet</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Chain ID:</span>
-                    <span>713715</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">RPC URL:</span>
-                    <span className="font-mono text-xs">https://evm-rpc.testnet.sei.io</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Explorer:</span>
-                    <span>https://seitrace.com</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Currency:</span>
-                    <span>SEI</span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-3">API Endpoints</h4>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <div className="text-gray-400">Validator Data:</div>
-                    <div className="font-mono text-xs break-all">https://sei.explorers.guru/api/validators</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400">Smart Contracts:</div>
-                    <div className="font-mono text-xs">Deployed on Sei EVM Testnet (Atlantic-2)</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

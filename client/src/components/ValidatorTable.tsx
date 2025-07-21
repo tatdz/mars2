@@ -7,14 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ReportModal } from "@/components/ReportModal";
-import { AlertTriangle, Info, RefreshCw } from "lucide-react";
+import { AlertTriangle, Info, RefreshCw, X, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export function ValidatorTable() {
   const { validators, isLoading, isError, refetch } = useValidators();
   const [selectedValidator, setSelectedValidator] = useState<string | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [showAllValidators, setShowAllValidators] = useState(false);
+  const [selectedValidatorDetails, setSelectedValidatorDetails] = useState<any>(null);
   
   const displayedValidators = showAllValidators ? validators : validators.slice(0, 5);
 
@@ -207,13 +209,16 @@ export function ValidatorTable() {
                             size="sm"
                             onClick={() => handleReportClick(validator.operator_address)}
                             className="text-validator-yellow hover:text-yellow-300 hover:bg-validator-yellow/10"
+                            title="Report an incident for this validator"
                           >
                             <AlertTriangle className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
+                            onClick={() => setSelectedValidatorDetails(validator)}
                             className="text-sei-blue hover:text-blue-300 hover:bg-sei-blue/10"
+                            title="View detailed score explanation"
                           >
                             <Info className="w-4 h-4" />
                           </Button>
@@ -248,6 +253,140 @@ export function ValidatorTable() {
         validatorAddress={selectedValidator}
         validators={validators}
       />
+
+      {/* Validator Details Modal */}
+      <Dialog open={!!selectedValidatorDetails} onOpenChange={() => setSelectedValidatorDetails(null)}>
+        <DialogContent className="bg-dark-card border-gray-700 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">
+              {selectedValidatorDetails?.description.moniker} - Score Details
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedValidatorDetails && (
+            <div className="space-y-6">
+              {/* Score Overview */}
+              <div className="text-center">
+                <div className="text-4xl font-bold mb-2">
+                  <span className={getScoreColorClass(scoreValidator(selectedValidatorDetails))}>
+                    {scoreValidator(selectedValidatorDetails)}
+                  </span>
+                </div>
+                <div className="text-lg text-gray-300">
+                  {getNextActionMessage(scoreValidator(selectedValidatorDetails)).title}
+                </div>
+              </div>
+
+              {/* Plain English Explanation */}
+              <Card className="bg-dark-bg border-gray-600">
+                <CardContent className="pt-4">
+                  <h3 className="font-semibold text-white mb-3">What this score means for stakers:</h3>
+                  <div className="space-y-2 text-gray-300">
+                    {scoreValidator(selectedValidatorDetails) >= 80 ? (
+                      <>
+                        <p>✅ This validator has excellent performance and is safe for staking.</p>
+                        <p>• High uptime ({(selectedValidatorDetails.uptime || 0).toFixed(1)}%)</p>
+                        <p>• Reliable block production</p>
+                        <p>• No recent incidents</p>
+                        <p>• Your rewards should be consistent</p>
+                      </>
+                    ) : scoreValidator(selectedValidatorDetails) >= 50 ? (
+                      <>
+                        <p>⚠️ This validator has moderate performance. Monitor closely if staking.</p>
+                        <p>• Uptime could be better ({(selectedValidatorDetails.uptime || 0).toFixed(1)}%)</p>
+                        <p>• Some missed blocks ({selectedValidatorDetails.missed_blocks || 0})</p>
+                        <p>• May affect your staking rewards</p>
+                        <p>• Consider diversifying your stake</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>🚨 This validator has poor performance. Consider unstaking immediately.</p>
+                        <p>• Low uptime ({(selectedValidatorDetails.uptime || 0).toFixed(1)}%)</p>
+                        <p>• High number of missed blocks ({selectedValidatorDetails.missed_blocks || 0})</p>
+                        <p>• High risk of slashing</p>
+                        <p>• Your staked funds may be at risk</p>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Score Breakdown */}
+              <Card className="bg-dark-bg border-gray-600">
+                <CardContent className="pt-4">
+                  <h3 className="font-semibold text-white mb-3">Score Breakdown:</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Uptime (40% weight)</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-white">{(selectedValidatorDetails.uptime || 0).toFixed(1)}%</span>
+                        {(selectedValidatorDetails.uptime || 0) >= 99 ? (
+                          <TrendingUp className="w-4 h-4 text-green-400" />
+                        ) : (selectedValidatorDetails.uptime || 0) >= 95 ? (
+                          <Minus className="w-4 h-4 text-yellow-400" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-400" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Block Production (30% weight)</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-white">{selectedValidatorDetails.missed_blocks || 0} missed blocks</span>
+                        {(selectedValidatorDetails.missed_blocks || 0) <= 5 ? (
+                          <TrendingUp className="w-4 h-4 text-green-400" />
+                        ) : (selectedValidatorDetails.missed_blocks || 0) <= 20 ? (
+                          <Minus className="w-4 h-4 text-yellow-400" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-400" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Status (20% weight)</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-white">{getStatusText(selectedValidatorDetails.status, selectedValidatorDetails.jailed)}</span>
+                        {!selectedValidatorDetails.jailed && selectedValidatorDetails.status === "BOND_STATUS_BONDED" ? (
+                          <TrendingUp className="w-4 h-4 text-green-400" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-400" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Community Reports (10% weight)</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-white">No incidents</span>
+                        <TrendingUp className="w-4 h-4 text-green-400" />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3">
+                <Button
+                  onClick={() => {
+                    setSelectedValidatorDetails(null);
+                    handleReportClick(selectedValidatorDetails.operator_address);
+                  }}
+                  variant="outline"
+                  className="flex-1 border-validator-yellow text-validator-yellow hover:bg-validator-yellow/10"
+                >
+                  Report an Incident
+                </Button>
+                <Button
+                  onClick={() => setSelectedValidatorDetails(null)}
+                  className="flex-1 bg-purple-accent hover:bg-purple-accent/90"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

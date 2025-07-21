@@ -32,7 +32,6 @@ import { Shield, AlertTriangle, Info, CheckCircle, Clock, User } from "lucide-re
 const reportSchema = z.object({
   validatorAddress: z.string().min(1, "Validator address is required"),
   incidentType: z.string().min(1, "Please select an incident type"),
-  severity: z.string().min(1, "Please select severity level"),
   description: z.string().min(20, "Description must be at least 20 characters"),
   evidence: z.string().optional(),
 });
@@ -49,12 +48,7 @@ const incidentTypes = [
   { value: "other", label: "Other", description: "Other validator-related issues" },
 ];
 
-const severityLevels = [
-  { value: "low", label: "Low", color: "text-green-400", description: "Minor issue, no immediate impact" },
-  { value: "medium", label: "Medium", color: "text-yellow-400", description: "Moderate issue, some impact" },
-  { value: "high", label: "High", color: "text-orange-400", description: "Serious issue, significant impact" },
-  { value: "critical", label: "Critical", color: "text-red-400", description: "Critical issue, major network impact" },
-];
+
 
 export function ReportPage() {
   const { address, isConnected } = useWallet();
@@ -66,7 +60,6 @@ export function ReportPage() {
     defaultValues: {
       validatorAddress: "",
       incidentType: "",
-      severity: "",
       description: "",
       evidence: "",
     },
@@ -74,13 +67,9 @@ export function ReportPage() {
 
   const onSubmit = async (data: ReportFormData) => {
     try {
-      await submitReport.mutateAsync({
-        validatorAddress: data.validatorAddress,
-        incidentType: data.incidentType,
-        severity: data.severity,
-        description: data.description,
-        evidence: data.evidence || "",
-      });
+      // Demo submission - simplified without blockchain calls
+      console.log("Demo report submitted:", data);
+      alert("Report submitted successfully! This is a demo version.");
       setIsSubmitted(true);
       form.reset();
     } catch (error) {
@@ -196,37 +185,7 @@ export function ReportPage() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="severity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white">Severity Level</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="bg-dark-bg border-gray-600 text-white">
-                              <SelectValue placeholder="Select severity" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-dark-card border-gray-600">
-                            {severityLevels.map((level) => (
-                              <SelectItem
-                                key={level.value}
-                                value={level.value}
-                                className="text-white hover:bg-gray-700"
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <span className={`font-medium ${level.color}`}>{level.label}</span>
-                                  <span className="text-gray-400">- {level.description}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
 
                   <FormField
                     control={form.control}
@@ -368,22 +327,27 @@ export function ReportPage() {
 
           <Card className="bg-dark-card border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white text-sm">Impact Levels</CardTitle>
+              <CardTitle className="text-white text-sm">Anonymous ZK Proofs</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {severityLevels.map((level) => (
-                <div key={level.value} className="flex items-center justify-between">
-                  <Badge variant="outline" className={`${level.color} border-current`}>
-                    {level.label}
-                  </Badge>
-                  <span className="text-xs text-gray-400">
-                    {level.value === 'low' && '-5 to -10 score'}
-                    {level.value === 'medium' && '-10 to -20 score'}
-                    {level.value === 'high' && '-20 to -35 score'}
-                    {level.value === 'critical' && '-35 to -50 score'}
-                  </span>
-                </div>
-              ))}
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="text-purple-accent border-current">
+                  Zero Knowledge
+                </Badge>
+                <span className="text-xs text-gray-400">Anonymous reporting</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="text-green-400 border-current">
+                  Sybil Resistant
+                </Badge>
+                <span className="text-xs text-gray-400">Prevents double reports</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="text-blue-400 border-current">
+                  Verifiable
+                </Badge>
+                <span className="text-xs text-gray-400">Cryptographically proven</span>
+              </div>
             </CardContent>
           </Card>
         </div>

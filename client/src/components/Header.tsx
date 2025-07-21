@@ -3,6 +3,7 @@ import { useWallet } from "@/hooks/useWallet";
 import { Button } from "@/components/ui/button";
 import { formatAddress } from "@/lib/crypto";
 import { RefreshCw } from "lucide-react";
+import { AnimatedMarsLogo } from "@/components/AnimatedMarsLogo";
 
 export function Header() {
   const [location] = useLocation();
@@ -21,6 +22,7 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center space-x-4">
+            <AnimatedMarsLogo className="w-10 h-10" />
             <div className="font-silkscreen text-2xl text-sei-blue">Mars²</div>
             <span className="text-gray-400 text-sm hidden sm:block">
               Staking Security Explorer

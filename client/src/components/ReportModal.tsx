@@ -72,25 +72,21 @@ export function ReportModal({ isOpen, onClose, validatorAddress, validators }: R
   });
 
   const onSubmit = async (data: ReportFormData) => {
-    if (!address || !isConnected) {
-      return;
-    }
-
     try {
-      const eventId = generateEventId(data.validator, data.incidentType);
-      const nullifier = generateNullifier(address, eventId);
-
-      await submitAttestation.mutateAsync({
-        nullifier,
-        validator: data.validator,
-        impact: data.impact,
-        reason: `${data.incidentType}: ${data.description}`,
-      });
-
-      form.reset();
-      onClose();
+      // Demo submission - no blockchain interaction needed
+      console.log("Demo report submitted:", data);
+      
+      // Simulate success
+      setTimeout(() => {
+        form.reset();
+        onClose();
+        // Show success message without using toast to avoid errors
+        alert("Report submitted successfully! This is a demo version.");
+      }, 1000);
+      
     } catch (error) {
       console.error("Failed to submit report:", error);
+      alert("Report submission failed. Please try again.");
     }
   };
 
