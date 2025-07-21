@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+
+  /* Mars² Dark Theme Variables */
+  --sei-blue: hsl(207, 90%, 54%);
+  --sei-dark-blue: hsl(207, 100%, 26%);
+  --validator-green: hsl(122, 39%, 49%);
+  --validator-yellow: hsl(36, 100%, 50%);
+  --validator-red: hsl(4, 90%, 58%);
+  --dark-bg: hsl(0, 0%, 7%);
+  --dark-surface: hsl(0, 0%, 12%);
+  --dark-card: hsl(0, 0%, 18%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-inter antialiased text-white;
+    background-color: var(--dark-bg);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .font-silkscreen {
+    font-family: 'Silkscreen', monospace;
+    font-weight: 400;
+  }
+
+  .font-inter {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .bg-dark-bg {
+    background-color: var(--dark-bg);
+  }
+  
+  .bg-dark-surface {
+    background-color: var(--dark-surface);
+  }
+  
+  .bg-dark-card {
+    background-color: var(--dark-card);
+  }
+  
+  .text-sei-blue {
+    color: var(--sei-blue);
+  }
+  
+  .text-sei-dark-blue {
+    color: var(--sei-dark-blue);
+  }
+  
+  .bg-sei-blue {
+    background-color: var(--sei-blue);
+  }
+  
+  .bg-sei-dark-blue {
+    background-color: var(--sei-dark-blue);
+  }
+  
+  .text-validator-green {
+    color: var(--validator-green);
+  }
+  
+  .text-validator-yellow {
+    color: var(--validator-yellow);
+  }
+  
+  .text-validator-red {
+    color: var(--validator-red);
+  }
+  
+  .bg-validator-green {
+    background-color: var(--validator-green);
+  }
+  
+  .bg-validator-yellow {
+    background-color: var(--validator-yellow);
+  }
+  
+  .bg-validator-red {
+    background-color: var(--validator-red);
+  }
+  
+  .border-validator-green {
+    border-color: var(--validator-green);
+  }
+  
+  .border-validator-yellow {
+    border-color: var(--validator-yellow);
+  }
+  
+  .border-validator-red {
+    border-color: var(--validator-red);
+  }
+}
