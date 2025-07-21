@@ -122,6 +122,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes: Latest modifications with dates
 
+### 2025-07-21: Eliza AI Agent Integration
+- **AI-Powered Staking Recommendations**: Integrated @elizaos/plugin-sei for personalized staking advice
+- **Smart Delegation Analysis**: Automatically fetches user's current delegations from Sei REST API
+- **Mars² Score Integration**: AI agent queries MarsValidatorScore contract for real risk assessments
+- **Personalized Action Buttons**: Each recommendation includes Unstake, Redelegate, and See Incidents actions
+- **Intelligent Risk Assessment**: AI generates plain-English recommendations based on Mars² scoring system
+- **Backend Eliza Service**: Created ElizaStakingAgent class with contract integration and delegation analysis
+- **Frontend AI Component**: Added StakingRecommendations component with loading states and error handling
+- **API Endpoint**: POST /api/eliza/recommendations for AI-powered staking advice
+- **Enhanced User Experience**: Users now get instant, personalized advice on wallet connection
+
 ### 2025-07-21: Major UI/UX Improvements
 - **Network Stats Layout**: Changed from vertical to horizontal layout to save space and improve visual balance
 - **Report Page Design**: Enhanced with colorful futuristic gradients and improved readability

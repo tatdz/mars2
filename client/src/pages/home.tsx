@@ -1,5 +1,6 @@
 import { ValidatorTable } from "@/components/ValidatorTable";
 import { NetworkStats } from "@/components/NetworkStats";
+import { StakingRecommendations } from "@/components/StakingRecommendations";
 
 export default function Home() {
   return (
@@ -19,6 +20,9 @@ export default function Home() {
               <NetworkStats />
             </div>
           </div>
+
+          {/* AI Staking Recommendations */}
+          <StakingRecommendations />
 
           {/* Validator Table */}
           <ValidatorTable />

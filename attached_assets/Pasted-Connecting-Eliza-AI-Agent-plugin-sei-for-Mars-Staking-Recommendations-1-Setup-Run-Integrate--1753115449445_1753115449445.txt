@@ -1,0 +1,226 @@
+Connecting Eliza AI Agent (plugin-sei) for Mars² Staking Recommendations
+🌟 1. Setup: Run/Integrate the Eliza Agent for Sei
+Add the plugin to your agent project:
+
+text
+pnpm install @elizaos/plugin-sei
+GitHub:
+https://github.com/elizaos-plugins/plugin-sei
+
+NPM:
+https://www.npmjs.com/package/@elizaos/plugin-sei
+
+Set up required environment variables:
+
+text
+SEI_PRIVATE_KEY=your_testnet_private_key
+SEI_NETWORK=testnet
+Use a funded testnet key for the agent (never a user’s key).
+
+Register the plugin inside your Eliza agent configuration:
+
+js
+import { seiPlugin } from "@elizaos/plugin-sei";
+export default {
+    plugins: [seiPlugin],
+    // ... any other plugins
+};
+See reference:
+https://github.com/elizaos-plugins/plugin-sei
+
+Start your Eliza agent service:
+For example:
+
+text
+pnpm start --character="characters/sample.character.json"
+More info on multi-plugin Eliza config:
+https://developers.flow.com/tutorials/ai-plus-flow/eliza/build-plugin
+
+🌈 2. User Flow: Mars² + Eliza Agent
+User Experience Sequence:
+
+User connects MetaMask in Mars² frontend
+
+Agent is called with the user’s public Sei EVM address
+
+Agent fetches:
+
+All current delegations (validators + SEI amount) for that address
+
+Mars² score/status for each of those validators
+
+Agent returns an array of:
+
+Validator name / address
+
+User’s staked amount
+
+Status (green/yellow/red)
+
+Personalized action recommendation
+
+Frontend renders recommendations, each with “Unstake,” “Redelegate,” and “See Incidents” buttons
+Example output:
+
+text
+RHINO (Red) — High risk! We recommend unstaking.
+[Unstake]  [Redelegate]  [See Incidents]
+🧠 3. Eliza Agent Logic: Fetch Delegations, Scores, and Generate Advice
+A. Fetching user staking positions
+You need an API call or JSON-RPC query for all active delegations for a Sei address.
+
+Sei explorer API reference: https://sei.explorers.guru/api/validators
+
+Staking positions: You may fetch userDelegations with e.g.
+
+text
+GET https://sei.explorers.guru/api/accounts/{yourAddress}/delegations
+or query a similar endpoint via REST or JSON-RPC.
+
+Example (node.js fetch):
+
+js
+async function getDelegations(userAddress) {
+  const res = await fetch(`https://sei.explorers.guru/api/accounts/${userAddress}/delegations`);
+  const data = await res.json();
+  // data.delegations is typically array of { validator_address, shares, ... }
+  return data.delegations || [];
+}
+B. Fetch Mars² Status For Each Validator
+You’ll need access to MarsValidatorScore.sol:
+
+Contract address: 0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294
+
+Network: Sei EVM testnet (https://evm-rpc.testnet.sei.io)
+
+Using ethers.js:
+
+js
+import { ethers } from "ethers";
+const provider = new ethers.JsonRpcProvider("https://evm-rpc.testnet.sei.io");
+const abi = [ "function getScore(address validator) public view returns (int256)" ];
+const contract = new ethers.Contract(
+  "0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294",
+  abi,
+  provider
+);
+
+async function getValidatorScore(validatorAddress) {
+  const score = await contract.getScore(validatorAddress);
+  return Number(score);
+}
+C. AI Agent: Generate Recommendations
+For each delegation:
+
+If score >= 80: Recommend “No action needed”
+
+If score 50–79: Recommend “Monitor, consider reducing delegation”
+
+If score < 50: Recommend “Unstake immediately, incident detected”
+
+Example agent function:
+
+js
+function actionRecommendation(score) {
+  if (score >= 80) return "🟢 Healthy — no action needed.";
+  if (score >= 50) return "🟡 Moderate risk. Monitor or reduce stake.";
+  return "🔴 High risk! Unstake immediately and review incidents.";
+}
+⚡ 4. Leverage Eliza’s Conversational UI
+When the frontend connects the wallet, it sends the address to the Eliza agent by POST (or via internal API call depending on your setup).
+
+Pseudo-code:
+
+js
+const userDelegations = await getDelegations(userAddress);
+const recommendations = await Promise.all(
+  userDelegations.map(async (d) => {
+    const score = await getValidatorScore(d.validator_address);
+    return {
+      validator: d.validator_address,
+      staked: d.shares,
+      score,
+      action: actionRecommendation(score)
+    }
+  }
+));
+The Eliza agent can wrap this reasoning in natural language and optionally offer actions:
+
+“Click Unstake to move your funds, Redelegate to choose a safer validator, or See Incidents to review recent issues.”
+
+💻 5. Mars² Frontend Integration
+On wallet connect:
+
+Call the agent endpoint with the user’s wallet address
+
+Show a recommendations panel listing:
+
+Validator name/address
+
+Staked amount
+
+Mars² score (with color badge)
+
+Next action message (as returned above)
+
+Buttons:
+
+[Unstake] (links to Sei protocol’s unstake)
+
+[Redelegate] (goes to Sei delegation UI / Mars² redelegation modal)
+
+[See Incidents] (shows incident log/zk reports for this validator)
+
+React Sketch:
+
+jsx
+<ValidatorRecommendation
+  validator="RHINO"
+  staked="1000"
+  score={45}
+  action="🔴 High risk! Unstake immediately and review incidents."
+  onUnstake={() => openUnstakeFlow("RHINO")}
+  onRedelegate={() => openRedelegateFlow("RHINO")}
+  onSeeIncidents={() => showIncidentModal("RHINO")}
+/>
+📒 6. Improve the User Flow in Mars²
+Before:
+
+User sees live validator list, must manually check each stake, open incidents table, and decide what to do
+
+With Eliza agent:
+
+On wallet connect, the app auto-advises each user where their risk is, with personalized clear step-by-step actions
+
+Smart call-to-action buttons let the user instantly act on advice
+
+Agent can answer “Why should I unstake?” or “Who is safest today?” with up-to-date, AI-powered reasoning
+
+📚 7. Further Reading and Developer References
+Eliza plugin-sei:
+https://github.com/elizaos-plugins/plugin-sei
+
+Eliza OS plugin registry and config:
+https://github.com/elizaos-plugins/registry
+
+Eliza plugin development on Flow:
+https://developers.flow.com/tutorials/ai-plus-flow/eliza/build-plugin
+
+Mars² validator scoring contract:
+https://seitrace.com/address/0x2358F2a3A43aa1aD43A1B6A04D52E26b7c37B294?chain=atlantic-2&tab=transactions
+
+Sei EVM testnet RPC:
+https://evm-rpc.testnet.sei.io
+
+✅ Summary Checklist for Replit
+ Install and configure Eliza agent with @elizaos/plugin-sei
+
+ Fetch user delegations via Sei REST/JSON-RPC
+
+ Fetch Mars² score for each delegated validator
+
+ Agent outputs plain-English recommendations per validator
+
+ Frontend displays each with color, amount, next steps, and incident/action buttons
+
+ Optionally, provide a conversational chat/FAQ powered by Eliza agent for followup (“Why this risk?”, “Should I unstake?”)

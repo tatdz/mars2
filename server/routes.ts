@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { ElizaStakingAgent } from "./eliza";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add CORS headers for API routes
@@ -97,6 +98,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         error: 'Failed to fetch validators',
         message: error.message 
+      });
+    }
+  });
+
+  // Initialize Eliza AI agent
+  const elizaAgent = new ElizaStakingAgent();
+
+  // Eliza AI recommendations endpoint
+  app.post('/api/eliza/recommendations', async (req, res) => {
+    try {
+      const { userAddress } = req.body;
+      
+      if (!userAddress || typeof userAddress !== 'string') {
+        return res.status(400).json({
+          error: 'Invalid request',
+          message: 'userAddress is required'
+        });
+      }
+
+      console.log(`Generating AI recommendations for ${userAddress}`);
+      const recommendations = await elizaAgent.getStakingRecommendations(userAddress);
+      
+      res.json(recommendations);
+    } catch (error: any) {
+      console.error('Error generating AI recommendations:', error);
+      res.status(500).json({
+        error: 'Failed to generate recommendations',
+        message: error.message
       });
     }
   });
