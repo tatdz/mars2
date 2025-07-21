@@ -64,9 +64,10 @@
   }
 
   body {
-    @apply font-inter antialiased text-white;
+    @apply font-inter antialiased;
     background-color: var(--dark-bg);
     font-family: 'Inter', sans-serif;
+    color: #f8fafc; /* Light gray text for better contrast */
   }
 
   .font-silkscreen {

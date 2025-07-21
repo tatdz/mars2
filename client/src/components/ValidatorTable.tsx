@@ -15,6 +15,9 @@ export function ValidatorTable() {
   const { validators, isLoading, isError, refetch } = useValidators();
   const [selectedValidator, setSelectedValidator] = useState<string | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [showAllValidators, setShowAllValidators] = useState(false);
+  
+  const displayedValidators = showAllValidators ? validators : validators.slice(0, 5);
 
   const handleReportClick = (validatorAddress: string) => {
     setSelectedValidator(validatorAddress);
@@ -141,7 +144,7 @@ export function ValidatorTable() {
                   </TableCell>
                 </TableRow>
               ) : (
-                validators.map((validator) => {
+                displayedValidators.map((validator) => {
                   const score = scoreValidator(validator);
                   const scoreColor = getScoreColor(score);
                   const scoreColorClass = getScoreColorClass(score);
@@ -276,7 +279,7 @@ export function ValidatorTable() {
                                 onClick={() => handleReportClick(validator.operator_address)}
                                 className="text-xs border-validator-yellow text-validator-yellow hover:bg-validator-yellow/10"
                               >
-                                View Reports
+                                Report Incident
                               </Button>
                             )}
                           </div>
@@ -290,6 +293,19 @@ export function ValidatorTable() {
             </TableBody>
           </Table>
         </div>
+        
+        {/* Load All Validators Button */}
+        {!showAllValidators && validators.length > 5 && (
+          <div className="p-4 border-t border-gray-700 text-center">
+            <Button
+              onClick={() => setShowAllValidators(true)}
+              variant="outline"
+              className="bg-sei-blue hover:bg-sei-blue/90 text-white border-sei-blue"
+            >
+              Load All Validators ({validators.length})
+            </Button>
+          </div>
+        )}
       </Card>
 
       {/* Report Modal */}
