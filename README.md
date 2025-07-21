@@ -1,6 +1,6 @@
 # Mars² Staking Security dApp
 
-A comprehensive real-time staking security explorer for the Sei EVM testnet that enables delegators, validators, and observers to monitor validator behavior, submit anonymous reports, and coordinate through encrypted messaging.
+A comprehensive real-time staking security explorer for the Sei EVM testnet that enables stakers and validators to monitor validator behavior, submit anonymous reports and coordinate through encrypted messaging.
 
 ## Features
 
@@ -99,16 +99,3 @@ The application includes demo functionality that works without requiring MetaMas
 ## License
 
 MIT License - see LICENSE file for details
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## Support
-
-For issues or questions:
-- GitHub Issues: [Create an issue](https://github.com/mars-protocol/mars2-staking-security/issues)
-- Documentation: Built-in docs available in the application
