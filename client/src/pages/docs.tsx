@@ -124,15 +124,15 @@ const docSections = [
         },
         {
           title: "Analysis Features",
-          content: "• **Real OpenAI GPT-4o Integration**: Genuine machine learning analysis of validator performance\n• **Comprehensive Data Analysis**: Examines uptime, commission rates, governance participation, jailed status\n• **Portfolio-Level Insights**: AI analyzes entire delegation portfolio for strategic recommendations\n• **Confidence Scoring**: Each recommendation includes AI confidence levels (0-100)\n• **Enhanced Fallback**: Sophisticated rule-based analysis when AI quota limits reached\n• **Sub-5 Second Response**: Optimized parallel processing for fast results"
+          content: "• Real OpenAI GPT-4o Integration: Genuine machine learning analysis of validator performance\n• Comprehensive Data Analysis: Examines uptime, commission rates, governance participation, jailed status\n• Portfolio-Level Insights: AI analyzes entire delegation portfolio for strategic recommendations\n• Confidence Scoring: Each recommendation includes AI confidence levels (0-100)\n• Enhanced Fallback: Sophisticated rule-based analysis when AI quota limits reached\n• Sub-5 Second Response: Optimized parallel processing for fast results"
         },
         {
           title: "AI-Generated Recommendations",
-          content: "**Advanced Analysis**: AI provides detailed validator assessments with specific concerns and action plans\n**Confidence Scoring**: Each recommendation includes AI confidence levels (85-95+ typical)\n**Key Concerns**: Specific issues identified (e.g., 'Validator jailed', 'High commission rate', 'Poor governance participation')\n**Suggested Actions**: Concrete next steps (e.g., 'Consider unstaking immediately', 'Research alternative validators', 'Monitor performance weekly')\n**Portfolio Insights**: Overall risk assessment and diversification recommendations"
+          content: "• Advanced Analysis: AI provides detailed validator assessments with specific concerns and action plans\n• Confidence Scoring: Each recommendation includes AI confidence levels (85-95+ typical)\n• Key Concerns: Specific issues identified (e.g., 'Validator jailed', 'High commission rate', 'Poor governance participation')\n• Suggested Actions: Concrete next steps (e.g., 'Consider unstaking immediately', 'Research alternative validators', 'Monitor performance weekly')\n• Portfolio Insights: Overall risk assessment and diversification recommendations"
         },
         {
           title: "Technical Implementation",
-          content: "• **Real AI Model**: Uses OpenAI GPT-4o for genuine machine learning analysis\n• **Quota Management**: Graceful fallback to enhanced rule-based system when AI limits reached\n• **Fast Processing**: Parallel validator analysis with 3-second timeouts\n• **Comprehensive Data**: Fetches real validator metrics from Sei blockchain APIs\n• **Error Handling**: Robust fallback mechanisms ensure consistent user experience"
+          content: "• Real AI Model: Uses OpenAI GPT-4o for genuine machine learning analysis\n• Quota Management: Graceful fallback to enhanced rule-based system when AI limits reached\n• Fast Processing: Parallel validator analysis with 3-second timeouts\n• Comprehensive Data: Fetches real validator metrics from Sei blockchain APIs\n• Error Handling: Robust fallback mechanisms ensure consistent user experience"
         }
       ]
     }
