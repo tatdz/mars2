@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useValidators } from "@/hooks/useValidators";
 import { scoreValidator, getScoreColor, getScoreColorClass, getStatusColor, getStatusText, getNextActionMessage } from "@/lib/scoring";
 import { formatAddress } from "@/lib/crypto";
@@ -150,9 +150,8 @@ export function ValidatorTable() {
                   const actionMessage = getNextActionMessage(score);
 
                   return (
-                    <>
+                    <React.Fragment key={validator.operator_address}>
                       <TableRow 
-                        key={validator.operator_address} 
                         className="border-gray-700 hover:bg-gray-700/50 transition-colors"
                       >
                       <TableCell>
@@ -284,7 +283,7 @@ export function ValidatorTable() {
                         </Alert>
                       </TableCell>
                     </TableRow>
-                  </>
+                  </React.Fragment>
                   );
                 })
               )}
