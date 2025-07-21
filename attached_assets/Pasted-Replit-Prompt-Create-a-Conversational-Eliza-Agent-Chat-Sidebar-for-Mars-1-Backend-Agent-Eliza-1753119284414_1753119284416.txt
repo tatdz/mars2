@@ -1,0 +1,238 @@
+Replit Prompt: Create a Conversational Eliza Agent Chat Sidebar for Mars²
+🧩 1. Backend Agent (Eliza + plugin-sei) Setup
+✅ 1.1 Install Eliza & plugin-sei
+bash
+pnpm install eliza-agent @elizaos/plugin-sei
+GitHub:
+https://github.com/elizaos-plugins/plugin-sei
+
+Eliza docs:
+https://developers.flow.com/tutorials/ai-plus-flow/eliza/build-plugin
+
+✅ 1.2 Configure plugin-sei
+Create agent.config.js:
+
+js
+import { seiPlugin } from "@elizaos/plugin-sei";
+
+export default {
+  plugins: [seiPlugin],
+  defaultCharacter: {
+    name: "Mars2 Assistant",
+    goals: ["answer questions about validator risk", "help users unstake or redelegate SEI", "assist with Mars² usage"],
+    systemPrompt: `
+      You are a staking assistant for the Sei blockchain.
+      You help users understand validator risk, staking decisions, and how to use Mars² tools.
+      You have access to validator scores, events, and delegation amounts.
+    `,
+  },
+};
+Set your .env values:
+
+bash
+SEI_NETWORK=testnet
+SEI_PRIVATE_KEY=<agent-funded-private-key>
+Full plugin-sei reference:
+https://github.com/elizaos-plugins/plugin-sei
+
+✅ 1.3 Create Agent Server API (Express or Simple Node)
+js
+// server.js
+import express from 'express';
+import eliza from 'eliza-agent';
+import config from './agent.config.js';
+
+const app = express();
+app.use(express.json());
+
+const agent = await eliza(config);
+
+app.post('/api/chat', async (req, res) => {
+  const { message } = req.body;
+  const reply = await agent.message(message);
+  res.json({ reply });
+});
+
+app.listen(3001, () => console.log("Eliza AI running on http://localhost:3001"));
+✅ Start your server on Replit or local dev with:
+
+bash
+node server.js
+💬 2. Frontend: React Chat Sidebar in Mars²
+✅ 2.1 Add React Component: SidebarChat.jsx
+jsx
+import React, { useState } from 'react';
+
+export default function SidebarChat({ walletAddress }) {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+
+  const sendMessage = async () => {
+    const entry = { role: "user", content: input };
+    setMessages([...messages, entry]);
+
+    const res = await fetch('/api/chat', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: input, wallet: walletAddress })
+    });
+    const data = await res.json();
+
+    setMessages([...messages, entry, { role: "assistant", content: data.reply }]);
+    setInput("");
+  };
+
+  return (
+    <div className="sidebar-chat">
+      <div className="chat-history">
+        {messages.map((m, i) => (
+          <div key={i} className={`msg ${m.role}`}>{m.content}</div>
+        ))}
+      </div>
+      <div className="chat-input">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask anything about staking..."
+        />
+        <button onClick={sendMessage}>Send</button>
+      </div>
+    </div>
+  );
+}
+Add some basic CSS:
+
+css
+.sidebar-chat {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  height: 60vh;
+  background: #101010;
+  color: white;
+  border-left: 1px solid #444;
+  display: flex;
+  flex-direction: column;
+}
+.chat-history {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+.msg.user {
+  text-align: right;
+  color: #00ffcc;
+}
+.msg.assistant {
+  text-align: left;
+  color: #ffffff;
+}
+.chat-input {
+  display: flex;
+  padding: 10px;
+  background: #151515;
+}
+input {
+  flex: 1;
+  margin-right: 5px;
+  padding: 6px;
+}
+✅ 2.2 Use in App.jsx
+jsx
+import SidebarChat from "./components/SidebarChat";
+
+function App() {
+  const [walletAddress, setWalletAddress] = useState(null);
+  // connect MetaMask or Sei EVM test wallet...
+
+  return (
+    <>
+      <MainAppBody />
+      <SidebarChat walletAddress={walletAddress} />
+    </>
+  );
+}
+🧠 3. Agent Logic: Respond to Real Questions
+Your assistant can now answer questions like:
+
+Example Prompt → AI Action
+"Should I unstake from RHINO?"
+
+Agent checks score from MarsValidatorScore.sol
+
+Returns decision and cooldown info
+
+Example:
+
+"RHINO is currently red (🟥 Score: 40). Based on Mars² policy, that's unsafe for staking. I recommend unstaking. Cooldown: 14 days."
+
+"What’s the safest validator today?"
+
+Agent queries all Mars² scores
+
+Filters top score
+
+Returns:
+
+"Imperator currently ranks highest: Score 97 🟢. Uptime: 99.9%, low missed blocks."
+
+"What happened to validator RHINO?"
+
+Agent calls getEvents() on MarsValidatorScore.sol
+
+Converts events into readable bullets:
+
+"RHINO Events Log:\n - Score -10 (missed blocks)\n - Score -20 (anonymous report)\n - Slashing reported July 19"
+
+"Give me staking advice."
+
+If walletAddress is included:
+
+Check wallet delegations (via Sei explorer API)
+
+For each validator, fetch score + events
+
+Return personalized report + button links
+
+🚀 Prompt Examples for Testing
+Use these to test your live AI sidebar:
+
+“Should I unstake from RHINO?”
+
+“Who are the safest validators right now?”
+
+“What’s my staking exposure look like?”
+
+“What reports exist for FTL Labs?”
+
+“Who is at risk of slashing?”
+
+“Show validator recommendations.”
+
+Callback strings: unstake_rhino, incidents_ftl, redelegate_xtznode
+
+🧰 Additional Tools
+Score Logic from Mars² is already onchain.
+
+Validator event logs = from MarsValidatorScore.getEvents(address)
+
+Delegations per user =
+URL: https://sei.explorers.guru/api/accounts/{address}/delegations
+
+✅ Summary: What Replit Should Build
+ Install and run Eliza agent with plugin-sei
+
+ Add /api/chat POST endpoint for agent replies
+
+ Build functional chat sidebar in Mars² frontend
+
+ Send natural language queries to agent
+
+ Agent fetches live Mars² validator data + returns smart Q&A
+
+ Enable multi-turn conversation
+
+ Personalize behavior using wallet address
+
+ Enable message callbacks ("unstake_rhino") within logic

@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { ElizaStakingAgent } from "./eliza";
+import { ChatAgent } from "./chat-agent";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add CORS headers for API routes
@@ -104,6 +105,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Initialize Eliza AI agent
   const elizaAgent = new ElizaStakingAgent();
+  
+  // Initialize Chat Agent
+  const chatAgent = new ChatAgent();
 
   // Eliza AI recommendations endpoint
   app.post('/api/eliza/recommendations', async (req, res) => {
@@ -154,6 +158,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Chat session initialization endpoint
+  app.post('/api/chat/session', async (req, res) => {
+    try {
+      const { sessionId, walletAddress } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({
+          error: 'Invalid request',
+          message: 'sessionId is required'
+        });
+      }
+
+      const session = chatAgent.getSession(sessionId, walletAddress);
+      res.json(session);
+    } catch (error: any) {
+      console.error('Error initializing chat session:', error);
+      res.status(500).json({
+        error: 'Failed to initialize session',
+        message: error.message
+      });
+    }
+  });
+
+  // Chat message processing endpoint
+  app.post('/api/chat/message', async (req, res) => {
+    try {
+      const { sessionId, message, walletAddress } = req.body;
+      
+      if (!sessionId || !message) {
+        return res.status(400).json({
+          error: 'Invalid request',
+          message: 'sessionId and message are required'
+        });
+      }
+
+      console.log(`Processing chat message: "${message}" for session ${sessionId}`);
+      const response = await chatAgent.processMessage(sessionId, message, walletAddress);
+      
+      res.json(response);
+    } catch (error: any) {
+      console.error('Error processing chat message:', error);
+      res.status(500).json({
+        error: 'Failed to process message',
+        message: error.message
+      });
+    }
+  });
+
+  // Cleanup old chat sessions periodically
+  setInterval(() => {
+    chatAgent.cleanupSessions();
+  }, 60 * 60 * 1000); // Every hour
 
   const httpServer = createServer(app);
 

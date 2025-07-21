@@ -122,6 +122,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes: Latest modifications with dates
 
+### 2025-07-21: Conversational Chat Sidebar with Full Eliza Integration
+- **Complete Chat System**: Built dedicated chat sidebar with session management and natural language processing
+- **Conversational AI Interface**: Users can now have full conversations with Mars² AI assistant using natural language
+- **Context-Aware Responses**: AI remembers conversation history and provides contextual responses based on user questions
+- **Advanced NLP Processing**: Handles complex queries like "Should I unstake from RHINO?" or "Who are the safest validators?"
+- **Session Management**: Persistent chat sessions with automatic cleanup and wallet-aware personalization  
+- **Interactive Chat UI**: Modern chat interface with message history, typing indicators, and responsive design
+- **Multi-Turn Conversations**: AI maintains context across multiple messages for deeper engagement
+- **Smart Query Parsing**: Recognizes validator names, staking actions, and risk assessment requests in natural language
+- **Personalized Advice**: When wallet is connected, provides specific recommendations based on user's actual delegations
+- **API Endpoints**: Added /api/chat/session and /api/chat/message for comprehensive chat functionality
+
 ### 2025-07-21: Eliza AI Agent Integration
 - **AI-Powered Staking Recommendations**: Integrated @elizaos/plugin-sei for personalized staking advice
 - **Smart Delegation Analysis**: Automatically fetches user's current delegations from Sei REST API
